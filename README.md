@@ -1,0 +1,129 @@
+# BuildProof
+
+**A notary registry for construction paperwork.** Contracts, supplementary agreements, acceptance acts and as-built documentation get a SHA-256 fingerprint on an EVM chain, signed by every party's wallet. Before anyone signs, a cross-check compares each act against the contract and its amendments: amounts, volumes, rates, dates, bank details. Anyone can later check a file by its hash without the content ever being published.
+
+Built for the [BLI Legal Tech Hackathon 2](https://dorahacks.io/hackathon/legal-hack-2026/detail), tracks *LegalTech & RegTech* and *AI x Blockchain*.
+
+> Status: working MVP on a local chain (`anvil`). Testnet deployment (Base Sepolia) is pending test ETH; see [Deployment](#deployment).
+
+## The problem
+
+I direct a construction and real-estate development company. Every month the same paperwork crosses between the client, the general contractor, subcontractors and technical supervision: acceptance acts for completed work, invoices, supplementary agreements that change quantities or unit rates, as-built documentation. It travels as scans and PDFs by e-mail and messengers.
+
+Two things go wrong, and both are boring and expensive:
+
+1. **Which version was signed?** A PDF can be re-exported with one number changed. When a dispute comes up months later, the parties compare files from their mailboxes and argue about which one is the signed one.
+2. **Does the act match the contract?** Checking an act means re-doing arithmetic and walking back through the contract and every amendment: is this the current unit rate, did the cumulative volume exceed what was agreed, is the bank account the one in the contract? It is done by hand, under time pressure, and errors pass.
+
+BuildProof does not replace the legal signature required by local law. It adds a tamper-evident, shared record of *exactly which bytes* each party approved, plus a machine check before approval.
+
+## What it does
+
+```
+ PDF ──sha256──► hash ──register──► BuildProofRegistry (EVM)
+                  │                    ▲          ▲
+                  │        sign (tx) ──┘          └── signBySig (EIP-712, relayed, no gas)
+                  │
+ contract + amendments + acts ──► cross-check ──► findings ──► sign  or  reject(reportHash)
+                                                                    
+ verify page: drop a file → hash in the browser → attestations, signers, status, amendments
+```
+
+- **Registry contract** ([contracts/BuildProofRegistry.sol](contracts/BuildProofRegistry.sol)). A record holds the file hash, document type, project reference, required signers and an optional link to the document it amends. It becomes `ATTESTED` only when every required signer has signed. A signer may `reject` with the hash of the reason (e.g. the cross-check report). When an amendment is attested, the original is marked `supersededBy`. Signers can sign directly or give an EIP-712 signature that anyone can relay, so a party without gas can still sign.
+- **Trust model.** Anyone can register any hash, so a stranger can front-run with fake signers. That does not block the real record (ids include the registrar and the signer list), and the verifier always sees *who* signed. Supply the expected party addresses and the page tells you whether a record matches them.
+- **Cross-check** ([checker/crosscheck.py](checker/crosscheck.py)). It reads the contract, supplementary agreements and acts and applies deterministic rules: line arithmetic, subtotal, VAT and total; contract reference; party names, tax IDs and IBANs; dates against the contract term; the unit rate in force for the act period (amendments apply from their effective date); cumulative volume per item against the amended contract quantity; total against the contract price. With `--llm`, a language model *extracts* the fields as well (any OpenAI-compatible endpoint), and the two extractions are compared field by field. **The model never decides.** Every finding is arithmetic on two numbers you can point at, so it cannot hallucinate a violation.
+- **CLI** ([cli/buildproof.mjs](cli/buildproof.mjs)): `hash`, `deploy`, `register`, `sign`, `sign-offline`, `relay`, `reject`, `status`, `verify`.
+- **Verify page** ([docs/](docs/), GitHub Pages). It hashes the file locally with WebCrypto and reads the chain through a public RPC. A party can also sign with a browser wallet (EIP-712) and send the signature to the other side.
+
+## Demo
+
+All documents in [examples/](examples/) are **synthetic** with fictional parties (`Alder Street Development Ltd.` as client, `Granite & Beam Construction LLC` as contractor, invalid test IBANs). The PDFs are byte-reproducible from [examples/source/documents.json](examples/source/documents.json).
+
+| Document | Planted problem | Found by the cross-check |
+|---|---|---|
+| Contract GC-2026/014 | none | - |
+| Supplementary Agreement No. 1 | none (qty of item 2: 340→380; rate of item 4: 27.50→29.00 from 2026-06-01) | - |
+| Act No. 1 | none | clean |
+| Act No. 2 | 400 × 42.00 written as 18,600.00 | `LINE_ARITHMETIC` |
+| | new roofing rate used before its effective date | `RATE` |
+| Act No. 3 | refers to contract GC-2026/**041** | `CONTRACT_REF` |
+| | contractor IBAN differs from the contract | `PARTY_IBAN` |
+| | masonry: 400 + 600 = 1,000 m² against 950 m² in the contract | `QUANTITY_OVERRUN` |
+| | VAT 6,870.00 instead of 6,780.00 | `VAT` |
+
+Run the whole story (local chain, about 30 seconds):
+
+```bash
+# prerequisites: Foundry, Node 18+, Python 3.10+
+pip install pypdf reportlab
+npm install
+forge install foundry-rs/forge-std --no-git
+bash scripts/demo.sh
+```
+
+The script renders the PDFs, runs the cross-check, deploys the registry to `anvil`, and then:
+
+1. registers the contract; the client signs with a transaction, the contractor signs **offline** (EIP-712) and a relayer submits it;
+2. registers Supplementary Agreement No. 1 as an amendment; once both sign, the contract shows `SUPERSEDED`;
+3. Act No. 1 passes the check and both parties sign it;
+4. Act No. 2 fails the check: the contractor has signed, the client **rejects** it with the SHA-256 of the cross-check report;
+5. verifies the original Act No. 1 (`VALID`, signed by the expected parties) and a copy with one changed amount (`NOT FOUND`).
+
+Then open the verify page against the same local chain:
+
+```bash
+python -m http.server 8000 --directory docs   # open http://localhost:8000, choose "Local anvil"
+```
+
+## Tests
+
+```bash
+forge test                                 # 20 tests including fuzzing: signatures, replay, malleability, griefing, amendments
+python checker/tests/test_crosscheck.py    # the cross-check finds exactly the planted problems and nothing else
+```
+
+## CLI reference
+
+```bash
+node cli/buildproof.mjs hash examples/pdf/act_01.pdf
+BP_PRIVATE_KEY=... node cli/buildproof.mjs register act.pdf --type acceptance-act --project PLOT-7 --signers 0xClient,0xContractor
+BP_PRIVATE_KEY=... node cli/buildproof.mjs sign-offline <id> --file act.pdf --out sig.json   # refuses if the file does not match the hash
+BP_PRIVATE_KEY=... node cli/buildproof.mjs relay sig.json
+BP_PRIVATE_KEY=... node cli/buildproof.mjs reject <id> --reason crosscheck.json
+node cli/buildproof.mjs verify act.pdf --parties parties.json
+```
+
+Network options: `--rpc` or `BP_RPC`; registry `--registry`, `BP_REGISTRY`, or `deployments/<chainId>.json`.
+
+Cross-check with a model (example: any OpenAI-compatible provider):
+
+```bash
+export BP_LLM_BASE_URL=https://integrate.api.nvidia.com/v1 BP_LLM_API_KEY=... BP_LLM_MODEL=nvidia/nemotron-3-super-120b-a12b
+python checker/crosscheck.py examples/pdf/*.pdf --llm        # rules on regex fields + LLM extraction compared
+python checker/crosscheck.py scans/*.pdf --llm-only          # rules on LLM-extracted fields (unknown layouts)
+```
+
+## Deployment
+
+The contract has no constructor arguments and no owner. To deploy on Base Sepolia:
+
+```bash
+BP_RPC=https://sepolia.base.org BP_PRIVATE_KEY=... node cli/buildproof.mjs deploy
+```
+
+Then add the network to `docs/networks.json` (`name`, `chainId`, `rpc`, `registry`). The address will be listed here once deployed.
+
+## Design notes and limits
+
+- Only hashes go on-chain. A hash of a short or guessable document can be brute-forced, so registering a hash of a template-like file reveals that the file exists. Real contracts and acts carry enough unique data (dates, amounts, names) for this not to matter much; a salted mode is on the roadmap.
+- A wallet signature is not a qualified electronic signature under any national law. BuildProof is an evidence layer next to the legally required signature, not a replacement.
+- The rule-based extractor only reads the layout of the bundled examples. Real documents vary, which is what `--llm-only` is for; findings are still computed by the same deterministic rules.
+- Roadmap: EAS attestation adapter (same data as an EAS schema), salted hashes, Russian/Polish/German document templates, subcontractor chains (act of a subcontractor must reconcile with the general contractor's act).
+
+## AI use
+
+Code, tests and this README were written with the help of Claude (Anthropic). The problem statement and the rules come from the author's daily work. The demo uses NVIDIA-hosted Nemotron for optional field extraction.
+
+## License
+
+[MIT](LICENSE)

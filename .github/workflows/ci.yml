@@ -1,0 +1,19 @@
+name: ci
+on: [push, pull_request]
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: foundry-rs/foundry-toolchain@v1
+      - uses: actions/setup-node@v4
+        with: { node-version: 20 }
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.12" }
+      - run: forge install foundry-rs/forge-std --no-git
+      - run: forge test -vv
+      - run: pip install pypdf reportlab
+      - run: python examples/make_examples.py && git diff --exit-code examples/pdf
+      - run: python checker/tests/test_crosscheck.py
+      - run: npm ci
+      - run: bash scripts/demo.sh

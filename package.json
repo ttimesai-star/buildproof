@@ -1,0 +1,14 @@
+{
+  "name": "buildproof",
+  "version": "0.1.0",
+  "description": "Notary registry for construction documents: hash on-chain, multi-party EIP-712 signatures, AI-assisted cross-check of acts against the contract.",
+  "license": "MIT",
+  "type": "module",
+  "bin": { "buildproof": "cli/buildproof.mjs" },
+  "scripts": {
+    "test": "forge test && python checker/tests/test_crosscheck.py",
+    "demo": "bash scripts/demo.sh"
+  },
+  "engines": { "node": ">=18" },
+  "dependencies": { "ethers": "^6.13.0" }
+}

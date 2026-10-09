@@ -1,0 +1,88 @@
+{
+  "_note": "SYNTHETIC data. Company names, tax IDs and IBANs are fictional and invalid by design. Act no. 1 is clean; acts no. 2 and no. 3 contain planted discrepancies for the cross-check demo.",
+  "parties": {
+    "client": {"name": "Alder Street Development Ltd.", "tax_id": "900000001", "iban": "XX00 TEST 0000 0000 0001"},
+    "contractor": {"name": "Granite & Beam Construction LLC", "tax_id": "900000002", "iban": "XX00 TEST 0000 0000 0002"}
+  },
+  "documents": [
+    {
+      "file": "contract_GC-2026-014.pdf",
+      "kind": "Contract",
+      "title": "General Construction Contract",
+      "number": "GC-2026/014",
+      "date": "2026-03-02",
+      "term": ["2026-03-10", "2026-09-30"],
+      "object": "Two-storey retail building, Plot 7 (fictional)",
+      "vat_rate": 20,
+      "lines": [
+        [1, "Excavation and backfill", "m3", 1200, 6.50, 7800.00],
+        [2, "Concrete foundation C25/30", "m3", 340, 118.00, 40120.00],
+        [3, "Masonry walls, 250 mm", "m2", 950, 42.00, 39900.00],
+        [4, "Roofing membrane", "m2", 610, 27.50, 16775.00]
+      ],
+      "subtotal": 104595.00, "vat": 20919.00, "total": 125514.00
+    },
+    {
+      "file": "supplementary_agreement_01.pdf",
+      "kind": "Supplementary Agreement",
+      "title": "Supplementary Agreement No. 1",
+      "number": "SA-1",
+      "contract_ref": "GC-2026/014",
+      "date": "2026-05-15",
+      "changes": [
+        {"item": 2, "field": "quantity", "from": 340, "to": 380, "effective": "2026-05-15", "why": "additional pile caps"},
+        {"item": 4, "field": "rate", "from": 27.50, "to": 29.00, "effective": "2026-06-01", "why": "membrane price change"}
+      ],
+      "new_subtotal": 110230.00, "new_vat": 22046.00, "new_total": 132276.00
+    },
+    {
+      "file": "act_01.pdf",
+      "kind": "Acceptance Act",
+      "title": "Acceptance Act No. 1",
+      "number": "1",
+      "contract_ref": "GC-2026/014",
+      "date": "2026-04-30",
+      "period": ["2026-03-10", "2026-04-30"],
+      "vat_rate": 20,
+      "lines": [
+        [1, "Excavation and backfill", "m3", 1200, 6.50, 7800.00],
+        [2, "Concrete foundation C25/30", "m3", 200, 118.00, 23600.00]
+      ],
+      "subtotal": 31400.00, "vat": 6280.00, "total": 37680.00
+    },
+    {
+      "file": "act_02.pdf",
+      "kind": "Acceptance Act",
+      "title": "Acceptance Act No. 2",
+      "number": "2",
+      "contract_ref": "GC-2026/014",
+      "date": "2026-05-31",
+      "period": ["2026-05-01", "2026-05-31"],
+      "vat_rate": 20,
+      "_planted": ["line 3 amount 18600.00 instead of 16800.00", "line 4 uses rate 29.00 before it takes effect on 2026-06-01"],
+      "lines": [
+        [2, "Concrete foundation C25/30", "m3", 175, 118.00, 20650.00],
+        [3, "Masonry walls, 250 mm", "m2", 400, 42.00, 18600.00],
+        [4, "Roofing membrane", "m2", 100, 29.00, 2900.00]
+      ],
+      "subtotal": 42150.00, "vat": 8430.00, "total": 50580.00
+    },
+    {
+      "file": "act_03.pdf",
+      "kind": "Acceptance Act",
+      "title": "Acceptance Act No. 3",
+      "number": "3",
+      "contract_ref": "GC-2026/041",
+      "date": "2026-06-30",
+      "period": ["2026-06-01", "2026-06-30"],
+      "vat_rate": 20,
+      "contractor_iban": "XX00 TEST 0000 0000 0092",
+      "_planted": ["contract reference GC-2026/041 instead of GC-2026/014", "contractor IBAN differs from the contract", "masonry cumulative 1000 m2 exceeds contract 950 m2", "VAT 6870.00 instead of 6780.00"],
+      "lines": [
+        [3, "Masonry walls, 250 mm", "m2", 600, 42.00, 25200.00],
+        [4, "Roofing membrane", "m2", 300, 29.00, 8700.00]
+      ],
+      "subtotal": 33900.00, "vat": 6870.00, "total": 40770.00
+    }
+  ]
+}

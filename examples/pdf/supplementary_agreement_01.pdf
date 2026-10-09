@@ -1,0 +1,114 @@
+%PDF-1.3
+%“Œ‹ž ReportLab Generated PDF document (opensource)
+1 0 obj
+<<
+/F1 2 0 R /F2 3 0 R /F3 4 0 R
+>>
+endobj
+2 0 obj
+<<
+/BaseFont /Helvetica /Encoding /WinAnsiEncoding /Name /F1 /Subtype /Type1 /Type /Font
+>>
+endobj
+3 0 obj
+<<
+/BaseFont /Helvetica-Oblique /Encoding /WinAnsiEncoding /Name /F2 /Subtype /Type1 /Type /Font
+>>
+endobj
+4 0 obj
+<<
+/BaseFont /Helvetica-Bold /Encoding /WinAnsiEncoding /Name /F3 /Subtype /Type1 /Type /Font
+>>
+endobj
+5 0 obj
+<<
+/Contents 9 0 R /MediaBox [ 0 0 595.2756 841.8898 ] /Parent 8 0 R /Resources <<
+/Font 1 0 R /ProcSet [ /PDF /Text /ImageB /ImageC /ImageI ]
+>> /Rotate 0 /Trans <<
+
+>> 
+  /Type /Page
+>>
+endobj
+6 0 obj
+<<
+/PageMode /UseNone /Pages 8 0 R /Type /Catalog
+>>
+endobj
+7 0 obj
+<<
+/Author (BuildProof synthetic example) /CreationDate (D:20000101000000+00'00') /Creator (anonymous) /Keywords () /ModDate (D:20000101000000+00'00') /Producer (ReportLab PDF Library - \(opensource\)) 
+  /Subject (unspecified) /Title (Supplementary Agreement No. 1) /Trapped /False
+>>
+endobj
+8 0 obj
+<<
+/Count 1 /Kids [ 5 0 R ] /Type /Pages
+>>
+endobj
+9 0 obj
+<<
+/Length 1843
+>>
+stream
+1 0 0 1 0 0 cm  BT /F1 12 Tf 14.4 TL ET
+BT /F2 8 Tf 9.6 TL ET
+BT 1 0 0 1 50 781.8898 Tm (SYNTHETIC EXAMPLE - fictional parties, not a real document) Tj T* ET
+BT /F3 15 Tf 18 TL ET
+BT 1 0 0 1 50 761.8898 Tm (Supplementary Agreement No. 1) Tj T* ET
+BT /F1 10 Tf 12 TL ET
+BT 1 0 0 1 50 739.8898 Tm (Document type: Supplementary Agreement) Tj T* ET
+BT /F1 10 Tf 12 TL ET
+BT 1 0 0 1 50 724.8898 Tm (Document No.: SA-1) Tj T* ET
+BT /F1 10 Tf 12 TL ET
+BT 1 0 0 1 50 709.8898 Tm (Contract No.: GC-2026/014) Tj T* ET
+BT /F1 10 Tf 12 TL ET
+BT 1 0 0 1 50 694.8898 Tm (Date: 2026-05-15) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 50 673.8898 Tm (Client: Alder Street Development Ltd. | Tax ID: 900000001 | IBAN: XX00 TEST 0000 0000 0001) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 50 658.8898 Tm (Contractor: Granite & Beam Construction LLC | Tax ID: 900000002 | IBAN: XX00 TEST 0000 0000 0002) Tj T* ET
+BT /F1 10 Tf 12 TL ET
+BT 1 0 0 1 50 633.8898 Tm (The parties agree to amend the contract as follows:) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 50 615.8898 Tm (Change: item 2 quantity 340.000 -> 380.000 effective 2026-05-15 \(additional pile caps\)) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 50 600.8898 Tm (Change: item 4 rate 27.50 -> 29.00 effective 2026-06-01 \(membrane price change\)) Tj T* ET
+BT /F1 10 Tf 12 TL ET
+BT 1 0 0 1 50 577.8898 Tm (New contract subtotal: 110230.00) Tj T* ET
+BT /F1 10 Tf 12 TL ET
+BT 1 0 0 1 50 562.8898 Tm (New contract VAT: 22046.00) Tj T* ET
+BT /F1 10 Tf 12 TL ET
+BT 1 0 0 1 50 547.8898 Tm (New contract total: 132276.00) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 50 502.8898 Tm (For the Client: ____________________        For the Contractor: ____________________) Tj T* ET
+BT /F2 8 Tf 9.6 TL ET
+BT 1 0 0 1 50 487.8898 Tm (Signatures are applied with the parties' wallets in BuildProof \(EIP-712\).) Tj T* ET
+ 
+endstream
+endobj
+xref
+0 10
+0000000000 65535 f 
+0000000061 00000 n 
+0000000112 00000 n 
+0000000219 00000 n 
+0000000334 00000 n 
+0000000446 00000 n 
+0000000649 00000 n 
+0000000717 00000 n 
+0000001018 00000 n 
+0000001077 00000 n 
+trailer
+<<
+/ID 
+[<ea1853ad2b5f650e5a63608417a875d2><ea1853ad2b5f650e5a63608417a875d2>]
+% ReportLab generated PDF document -- digest (opensource)
+
+/Info 7 0 R
+/Root 6 0 R
+/Size 10
+>>
+startxref
+2971
+%%EOF

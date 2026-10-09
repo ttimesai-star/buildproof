@@ -1,0 +1,92 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>BuildProof Verify</title>
+<meta name="description" content="Check a construction document against the BuildProof on-chain registry. The file is hashed in your browser and never uploaded.">
+<style>
+:root{--bg:#f6f5f2;--card:#fff;--ink:#1c1f23;--muted:#5d6670;--line:#dcd9d2;--accent:#1f5f8b;--ok:#1d7a46;--okbg:#e5f4ea;--bad:#a8321e;--badbg:#fbe9e5;--warn:#8a5a00;--warnbg:#fdf2dc;--mono:ui-monospace,SFMono-Regular,Consolas,monospace}
+@media (prefers-color-scheme:dark){:root{--bg:#15181b;--card:#1d2126;--ink:#e7e9ec;--muted:#9aa3ad;--line:#30363d;--accent:#6fb3e0;--ok:#5fd08f;--okbg:#17301f;--bad:#f0866f;--badbg:#3a1d17;--warn:#e8b75c;--warnbg:#36290f}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+main{max-width:860px;margin:0 auto;padding:32px 16px 64px}
+h1{font-size:28px;margin:0 0 4px}
+h2{font-size:18px;margin:28px 0 10px}
+p.lead{color:var(--muted);margin:0 0 24px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:18px;margin:0 0 16px}
+#drop{border:2px dashed var(--line);border-radius:10px;padding:28px;text-align:center;cursor:pointer}
+#drop.over{border-color:var(--accent)}
+label{display:block;font-size:13px;color:var(--muted);margin:10px 0 4px}
+input,select,textarea{width:100%;padding:9px 10px;border:1px solid var(--line);border-radius:7px;background:var(--bg);color:var(--ink);font:inherit}
+textarea{font-family:var(--mono);font-size:13px;min-height:70px}
+.row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+@media (max-width:620px){.row{grid-template-columns:1fr}}
+button{background:var(--accent);color:#fff;border:0;border-radius:7px;padding:10px 16px;font:inherit;cursor:pointer;margin-top:12px}
+button.secondary{background:transparent;color:var(--accent);border:1px solid var(--accent)}
+.mono{font-family:var(--mono);font-size:13px;word-break:break-all}
+.badge{display:inline-block;padding:2px 9px;border-radius:999px;font-size:13px;font-weight:600}
+.ok{background:var(--okbg);color:var(--ok)}.bad{background:var(--badbg);color:var(--bad)}.warn{background:var(--warnbg);color:var(--warn)}
+table{width:100%;border-collapse:collapse;font-size:14px}
+td{padding:5px 6px;border-top:1px solid var(--line);vertical-align:top}
+td:first-child{color:var(--muted);width:130px}
+.muted{color:var(--muted);font-size:14px}
+details summary{cursor:pointer;color:var(--accent)}
+footer{margin-top:40px;color:var(--muted);font-size:13px}
+a{color:var(--accent)}
+</style>
+</head>
+<body>
+<main>
+  <h1>BuildProof: verify a document</h1>
+  <p class="lead">Drop a contract, supplementary agreement or acceptance act. Your browser computes its SHA-256 locally; only the hash is sent to the blockchain node. The file itself is never uploaded.</p>
+
+  <div class="card">
+    <div class="row">
+      <div>
+        <label for="net">Network</label>
+        <select id="net"></select>
+      </div>
+      <div>
+        <label for="reg">Registry contract</label>
+        <input id="reg" class="mono" placeholder="0x...">
+      </div>
+    </div>
+    <label for="rpc">RPC URL</label>
+    <input id="rpc" class="mono">
+    <p class="muted" id="netnote"></p>
+  </div>
+
+  <div class="card">
+    <div id="drop" tabindex="0" role="button" aria-label="Choose a file to verify">
+      <strong>Drop a file here</strong> or click to choose
+      <div class="muted">PDF or any other file. Nothing leaves your computer except its hash.</div>
+      <input id="file" type="file" hidden>
+    </div>
+    <label for="hash">or paste a SHA-256 hash</label>
+    <input id="hash" class="mono" placeholder="0x + 64 hex characters">
+    <label for="parties">Expected signers (optional): one address per line, optionally followed by a name</label>
+    <textarea id="parties" placeholder="0x7099...79C8 Client&#10;0x3C44...93BC Contractor"></textarea>
+    <button id="go">Verify</button>
+  </div>
+
+  <div id="result"></div>
+
+  <h2>Sign as a party (no gas)</h2>
+  <div class="card">
+    <p class="muted" style="margin-top:0">Open the attestation id you were sent, check that the document hash matches your copy, then sign with your wallet. You get a signature file; anyone (for example the other party) can submit it with <span class="mono">buildproof relay</span>.</p>
+    <label for="sid">Attestation id</label>
+    <input id="sid" class="mono" placeholder="0x...">
+    <button id="signbtn" class="secondary">Connect wallet and sign (EIP-712)</button>
+    <pre id="sigout" class="mono" style="white-space:pre-wrap"></pre>
+  </div>
+
+  <footer>
+    BuildProof is an open-source prototype (MIT). Demo documents are synthetic, with fictional parties.
+    <a href="https://github.com/ttimesai-star/buildproof">Source code</a>.
+  </footer>
+</main>
+<script src="https://cdn.jsdelivr.net/npm/ethers@6.13.4/dist/ethers.umd.min.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
