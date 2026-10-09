@@ -16,7 +16,7 @@ export const ABI = [
   "event Superseded(bytes32 indexed oldId, bytes32 indexed newId)",
 ];
 
-export const DOC_TYPES = ["other", "contract", "supplementary-agreement", "acceptance-act", "as-built", "invoice"];
+export const DOC_TYPES = ["other", "contract", "supplementary-agreement", "acceptance-act", "as-built", "invoice", "nda", "ai-output"];
 export const STATUS = ["NONE", "PENDING", "ATTESTED", "REJECTED"];
 export const SIGNER_STATE = ["-", "awaiting", "signed", "rejected"];
 

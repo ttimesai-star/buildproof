@@ -1,18 +1,18 @@
 {
   "name": "buildproof",
   "version": "0.1.0",
-  "description": "Notary registry for construction documents: hash on-chain, multi-party EIP-712 signatures, AI-assisted cross-check of acts against the contract.",
+  "description": "Verifiable, tamper-evident attestations for legal documents and AI-generated legal outputs: multi-party wallet signatures on-chain (EIP-712, gasless relay), deterministic pre-signing checks, and a pay-per-verify API for AI agents (x402).",
   "license": "MIT",
   "type": "module",
   "bin": {
     "buildproof": "cli/buildproof.mjs"
   },
   "scripts": {
-    "test": "forge test && python checker/tests/test_crosscheck.py && node --test api/test/api.test.mjs api/test/near.test.mjs cli/test/attribution.test.mjs",
+    "test": "forge test && python checker/tests/test_crosscheck.py && node --test api/test/api.test.mjs api/test/near.test.mjs cli/test/attribution.test.mjs cli/test/legal.test.mjs",
     "demo": "bash scripts/demo.sh",
     "test:api": "node --test api/test/api.test.mjs api/test/near.test.mjs",
     "api": "node api/server.mjs",
-    "test:cli": "node --test cli/test/attribution.test.mjs"
+    "test:cli": "node --test cli/test/attribution.test.mjs cli/test/legal.test.mjs"
   },
   "engines": {
     "node": ">=18"

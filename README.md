@@ -1,12 +1,47 @@
 # BuildProof
 
-**A notary registry for construction paperwork.** Contracts, supplementary agreements, acceptance acts and as-built documentation get a SHA-256 fingerprint on an EVM chain, signed by every party's wallet. Before anyone signs, a cross-check compares each act against the contract and its amendments: amounts, volumes, rates, dates, bank details. Anyone can later check a file by its hash without the content ever being published.
+**Verifiable, tamper-evident attestations for legal documents and AI-generated legal outputs: multi-party wallet signatures on-chain (EIP-712, gasless relay), deterministic pre-signing checks, and a pay-per-verify API for AI agents (x402).**
 
 Built for the [BLI Legal Tech Hackathon 2](https://dorahacks.io/hackathon/legal-hack-2026/detail), tracks *LegalTech & RegTech* and *AI x Blockchain*.
 
 > Status: live on Base mainnet (registry, verify page, paid x402 API), demo records only so far; see [Live on Base](#live-on-base). Every transaction the CLI sends carries BuildProof's Base Builder Code (ERC-8021).
 
-## The problem
+## Legal use cases
+
+BuildProof provides an immutable, hash-only audit trail and multi-party attestation layer for legal and compliance operations. Content remains private off-chain while party approval and document lineage are proven on-chain.
+
+- **Contract and amendment chains (`supersededBy`):** Main contracts linked to supplementary agreements; once an amendment is attested, the original record shows as superseded.
+- **NDAs and engagement letters:** Multi-party execution via wallet transactions or gasless EIP-712 signatures.
+- **Acceptance acts and invoices:** Pre-signing checks verify arithmetic, rates, cumulative volumes, and party details before registration.
+- **AI-generated legal outputs:** A canonical manifest combines model ID, prompt SHA-256, input document SHA-256 array, and output SHA-256. Co-signed by an AI operator and a human reviewer, it proves which exact output a lawyer approved and guarantees it was not edited afterwards.
+- **Evidence bundles for disputes and arbitration:** Timestamped SHA-256 fingerprints recorded on-chain while sensitive evidence files remain strictly private.
+- **KYC and compliance file custody:** Hash-only proof of file state at a point in time without putting personal data on-chain.
+
+BuildProof complements legally required signatures and serves as tamper-evident evidence layer; see [Legal Weight](#threat-model-design-notes-and-limits) for regulatory scope.
+
+### NDA and AI-output attestation workflow
+
+```bash
+# Register and co-sign a mutual NDA
+BP_PRIVATE_KEY=... node cli/buildproof.mjs register examples/legal/nda_mutual.pdf \
+  --type nda --project LEGAL-2026 --signers 0xPartyA,0xPartyB
+
+# Build a canonical review manifest for AI legal output
+node cli/buildproof.mjs manifest --model gpt-4o \
+  --prompt examples/legal/ai_review_prompt.txt \
+  --input examples/legal/nda_mutual.pdf \
+  --output examples/legal/ai_review_output.md \
+  --created 2026-10-09 > examples/legal/ai_review_manifest.json
+
+# Register manifest on-chain for AI operator and human reviewer
+BP_PRIVATE_KEY=... node cli/buildproof.mjs register examples/legal/ai_review_manifest.json \
+  --type ai-output --project LEGAL-2026 --signers 0xOperator,0xReviewer
+
+# Verify any file or manifest hash
+node cli/buildproof.mjs verify examples/legal/ai_review_manifest.json
+```
+
+## Worked example: construction contracts and acceptance acts
 
 I direct a construction and real-estate development company. Every month the same paperwork crosses between the client, the general contractor, subcontractors and technical supervision: acceptance acts for completed work, invoices, supplementary agreements that change quantities or unit rates, as-built documentation. It travels as scans and PDFs by e-mail and messengers.
 
@@ -32,7 +67,7 @@ BuildProof does not replace the legal signature required by local law. It adds a
 - **Registry contract** ([contracts/BuildProofRegistry.sol](contracts/BuildProofRegistry.sol)). A record holds the file hash, document type, project reference, required signers and an optional link to the document it amends. It becomes `ATTESTED` only when every required signer has signed. A signer may `reject` with the hash of the reason (e.g. the cross-check report). When an amendment is attested, the original is marked `supersededBy`. Signers can sign directly or give an EIP-712 signature that anyone can relay, so a party without gas can still sign.
 - **Trust model.** Anyone can register any hash, so a stranger can front-run with fake signers. That does not block the real record (ids include the registrar and the signer list), and the verifier always sees *who* signed. Supply the expected party addresses and the page tells you whether a record matches them.
 - **Cross-check** ([checker/crosscheck.py](checker/crosscheck.py)). It reads the contract, supplementary agreements and acts and applies deterministic rules: line arithmetic, subtotal, VAT and total; contract reference; party names, tax IDs and IBANs; dates against the contract term; the unit rate in force for the act period (amendments apply from their effective date); cumulative volume per item against the amended contract quantity; total against the contract price. With `--llm`, a language model *extracts* the fields as well (any OpenAI-compatible endpoint), and the two extractions are compared field by field. **The model never decides.** Every finding is arithmetic on two numbers you can point at, so it cannot hallucinate a violation.
-- **CLI** ([cli/buildproof.mjs](cli/buildproof.mjs)): `hash`, `deploy`, `register`, `sign`, `sign-offline`, `relay`, `reject`, `status`, `verify`.
+- **CLI** ([cli/buildproof.mjs](cli/buildproof.mjs)): `hash`, `manifest`, `deploy`, `register`, `sign`, `sign-offline`, `relay`, `reject`, `status`, `verify`.
 - **Verify page** ([docs/](docs/), GitHub Pages). It hashes the file locally with WebCrypto and reads the chain through a public RPC. A party can also sign with a browser wallet (EIP-712) and send the signature to the other side.
 
 - **Paid lookup API for agents** ([api/](api/README.md)). `GET /v1/attestation/{sha256}` returns the verdict (`ATTESTED`, `SUPERSEDED`, `PENDING`, `REJECTED`, `NOT_FOUND`), the signers and the dates. The price is $0.01 in USDC per request over [x402](https://docs.x402.org). The service is read-only and holds no key. It runs as a Cloudflare Worker or with Node.
@@ -82,17 +117,18 @@ The hosted page (https://ttimesai-star.github.io/buildproof/) can also talk to y
 ## Tests
 
 ```bash
-forge test                                 # 20 tests including fuzzing: signatures, replay, malleability, griefing, amendments
-python checker/tests/test_crosscheck.py    # the cross-check finds exactly the planted problems and nothing else
-node --test api/test/api.test.mjs          # x402 API: 402 price list, paid lookups on a live anvil registry, refused bad payments
-node --test api/test/near.test.mjs         # NEAR AI Agent Market backend: brief parsing, webhook HMAC, submit/decline
-node --test cli/test/attribution.test.mjs  # ERC-8021 suffix vs Base docs, dashboard and ox; registry accepts attributed calls
+forge test                                                # 20 tests including fuzzing: signatures, replay, malleability, griefing, amendments
+python checker/tests/test_crosscheck.py                   # the cross-check finds exactly the planted problems and nothing else
+node --test api/test/api.test.mjs                         # x402 API: 402 price list, paid lookups on a live anvil registry, refused bad payments
+node --test api/test/near.test.mjs                        # NEAR AI Agent Market backend: brief parsing, webhook HMAC, submit/decline
+node --test cli/test/attribution.test.mjs cli/test/legal.test.mjs # ERC-8021 suffix and legal use cases (NDA, AI-output manifests)
 ```
 
 ## CLI reference
 
 ```bash
 node cli/buildproof.mjs hash examples/pdf/act_01.pdf
+node cli/buildproof.mjs manifest --model gpt-4o --prompt p.txt --input nda.pdf --output out.md --created 2026-10-09
 BP_PRIVATE_KEY=... node cli/buildproof.mjs register act.pdf --type acceptance-act --project PLOT-7 --signers 0xClient,0xContractor
 BP_PRIVATE_KEY=... node cli/buildproof.mjs sign-offline <id> --file act.pdf --out sig.json   # refuses if the file does not match the hash
 BP_PRIVATE_KEY=... node cli/buildproof.mjs relay sig.json
