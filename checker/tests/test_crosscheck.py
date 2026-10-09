@@ -43,6 +43,14 @@ def test_report_hash_is_stable():
     assert crosscheck.run(PDFS)["report_sha256"] == crosscheck.run(PDFS)["report_sha256"]
 
 
+def test_num_formatting():
+    assert crosscheck._num("1,234.56") == 1234.56
+    assert crosscheck._num("1.234,56") == 1234.56
+    assert crosscheck._num("1 234,56") == 1234.56
+    assert crosscheck._num("1234,56") == 1234.56
+    assert crosscheck._num("1,234,567") == 1234567.0
+
+
 if __name__ == "__main__":
     for name, fn in list(globals().items()):
         if name.startswith("test_"):

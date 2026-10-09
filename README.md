@@ -54,8 +54,8 @@ All documents in [examples/](examples/) are **synthetic** with fictional parties
 Run the whole story (local chain, about 30 seconds):
 
 ```bash
-# prerequisites: Foundry, Node 18+, Python 3.10+
-pip install pypdf reportlab
+# prerequisites: Foundry (forge, anvil), Node 18+, Python 3.10+
+pip install pypdf reportlab pytest
 npm install
 forge install foundry-rs/forge-std --no-git
 bash scripts/demo.sh
@@ -115,12 +115,14 @@ BP_RPC=https://sepolia.base.org BP_PRIVATE_KEY=... node cli/buildproof.mjs deplo
 
 Then add the network to `docs/networks.json` (`name`, `chainId`, `rpc`, `registry`). The address will be listed here once deployed.
 
-## Design notes and limits
+## Threat model, design notes and limits
 
-- Only hashes go on-chain. A hash of a short or guessable document can be brute-forced, so registering a hash of a template-like file reveals that the file exists. Real contracts and acts carry enough unique data (dates, amounts, names) for this not to matter much; a salted mode is on the roadmap.
-- A wallet signature is not a qualified electronic signature under any national law. BuildProof is an evidence layer next to the legally required signature, not a replacement.
-- The rule-based extractor only reads the layout of the bundled examples. Real documents vary, which is what `--llm-only` is for; findings are still computed by the same deterministic rules.
-- Roadmap: EAS attestation adapter (same data as an EAS schema), salted hashes, Russian/Polish/German document templates, subcontractor chains (act of a subcontractor must reconcile with the general contractor's act).
+- **Threat Model & Front-Running:** Anyone may register a hash on-chain with any signer list. Front-running a registration with fake signers produces a distinct attestation ID (`realId != fakeId`) because the ID embeds the registrar address and full signers array. Verifiers filter attestations against their list of expected party addresses.
+- **EIP-712 Replay & Malleability:** EIP-712 domain separators bind signatures to `block.chainid` and the specific registry contract address. Signatures embed attestation IDs and document hashes, preventing signature reuse across documents, contracts, or chains. Signature malleability is prevented by enforcing upper bounds (`s <= HALF_N`) and rejecting `address(0)`.
+- **Privacy & Salt:** Only document SHA-256 hashes go on-chain. Standard hashes of short or low-entropy template documents can potentially be brute-forced. Real construction contracts contain sufficient unique metadata (dates, IBANs, tax IDs, amounts) to prevent dictionary attacks. Salted document hashes are on the roadmap for low-entropy forms.
+- **Legal Weight:** A wallet signature is not a Qualified Electronic Signature (QES) under EU eIDAS or US ESIGN regulations. BuildProof functions as an immutable audit trail and tamper-evident evidence layer alongside legally required signatures.
+- **Cross-Check Scope:** The rule-based extractor in `crosscheck.py` handles the layout of the bundled examples. For arbitrary layouts, `--llm-only` uses an LLM solely for field extraction, while all compliance logic and arithmetic rules remain 100% deterministic Python.
+- **Roadmap:** EAS attestation adapter, salted document hashes, additional legal document templates, subcontractor chain reconciliation.
 
 ## AI use
 

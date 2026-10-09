@@ -124,6 +124,12 @@ async function cmdSignOffline(id, opt) {
 async function cmdRelay(file, opt) {
   const c = await ctx(opt, true);
   const s = JSON.parse(readFileSync(file, "utf8"));
+  if (s.chainId && Number(s.chainId) !== Number(c.chainId)) {
+    throw new Error(`Signature chainId (${s.chainId}) does not match current network (${c.chainId})`);
+  }
+  if (s.registry && c.address && ethers.getAddress(s.registry) !== ethers.getAddress(c.address)) {
+    throw new Error(`Signature registry (${s.registry}) does not match target registry (${c.address})`);
+  }
   const tx = await need(c.registry).signBySig(s.attestationId, s.signer, s.signature);
   await tx.wait();
   console.log(`relayed signature of ${s.signer} (gas paid by ${c.wallet.address}, tx ${tx.hash})`);

@@ -201,7 +201,8 @@ contract BuildProofRegistry {
             a.closedAt = uint64(block.timestamp);
             emit Attested(id, a.docHash);
             bytes32 old = a.supersedes;
-            if (old != bytes32(0) && supersededBy[old] == bytes32(0)) {
+            if (old != bytes32(0)) {
+                if (supersededBy[old] != bytes32(0)) revert BadSupersedes(old);
                 supersededBy[old] = id;
                 emit Superseded(old, id);
             }
