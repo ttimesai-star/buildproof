@@ -77,9 +77,26 @@ npx wrangler deploy --config api/wrangler.toml
 curl -i https://buildproof-x402.<your-subdomain>.workers.dev/v1/attestation/0x…   # expect 402
 ```
 
+### Deploy with the stored API token (no browser login)
+
+Account: `Zbignevich@gmail.com's Account` (id `8f9a77b025c2f958f915b1b4da43c036`), free plan, subdomain `zbignevich.workers.dev`. A scoped user API token `buildproof-workers-deploy` (created 2026-10-09) lives in `~/.claude/secrets/cloudflare_workers.json` (`account_id`, `token`, `scope`, `created`). Permissions: this account only, **Workers Scripts: Edit** + **Account Settings: Read**; no zones/DNS, no KV, no expiry, no IP filter. Never print or commit the token.
+
+```bash
+export CLOUDFLARE_API_TOKEN=$(python -c "import json,os;print(json.load(open(os.path.expanduser('~/.claude/secrets/cloudflare_workers.json')))['token'])")
+export CLOUDFLARE_ACCOUNT_ID=8f9a77b025c2f958f915b1b4da43c036
+npx wrangler whoami                                   # shows the account; "Unable to retrieve email" is expected (no User Details scope)
+npx wrangler deploy --config api/wrangler.toml        # -> https://buildproof-x402.zbignevich.workers.dev
+```
+
+Checked 2026-10-09 with a throwaway hello Worker: `deploy` -> HTTP 200 on workers.dev, `delete --name <worker> --force` removed it. `wrangler delete` then reports an authentication error on `/storage/kv/namespaces` (it tries to clean up KV and the token has no KV scope); the Worker is still deleted. If the service ever needs KV, recreate the token with `Workers KV Storage: Edit` added. Other Workers on this account (`telegram-bridge`, `agent-signer-tc1695`, `gentle-disk-1fe5`) are not ours to touch.
+
 `nodejs_compat` is enabled in `wrangler.toml` (one dependency imports `url`). The bundle is about 1.4 MB before compression, well under the free-plan limit. CI checks that it bundles.
 
 Alternative without Cloudflare: any Node 20+ host running `node api/server.mjs`.
+
+## Live deployment (Base mainnet, 2026-10-09)
+
+`https://buildproof-x402.zbignevich.workers.dev` reads the registry `0xF818e4A95BBA02c822bCa8A0CFB50a2Ae4B8eE94` on Base mainnet and quotes `exact`, 10000 units of USDC `0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913` on `eip155:8453` to `0xC628715a1ed46eb555B088e3d43dc61AE0134F33`, facilitator PayAI (no API key). Checked: `/health` 200, `/` 200, unpaid lookup 402 with that price list, malformed hash 400. A paid call on mainnet has not been run yet (needs a buyer wallet with USDC on Base).
 
 ## Facilitators for mainnet
 
