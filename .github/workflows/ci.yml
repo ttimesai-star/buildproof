@@ -17,5 +17,6 @@ jobs:
       - run: python checker/tests/test_crosscheck.py
       - run: npm ci
       - run: node --test api/test/api.test.mjs
+      - run: node --test cli/test/attribution.test.mjs
       - run: npx --yes esbuild@0.25.0 api/worker.mjs --bundle --format=esm --platform=browser --conditions=worker,browser --external:url --external:"node:*" --outfile=/tmp/worker.js
       - run: bash scripts/demo.sh

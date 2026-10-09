@@ -8,10 +8,11 @@
     "buildproof": "cli/buildproof.mjs"
   },
   "scripts": {
-    "test": "forge test && python checker/tests/test_crosscheck.py && node --test api/test/api.test.mjs",
+    "test": "forge test && python checker/tests/test_crosscheck.py && node --test api/test/api.test.mjs cli/test/attribution.test.mjs",
     "demo": "bash scripts/demo.sh",
     "test:api": "node --test api/test/api.test.mjs",
-    "api": "node api/server.mjs"
+    "api": "node api/server.mjs",
+    "test:cli": "node --test cli/test/attribution.test.mjs"
   },
   "engines": {
     "node": ">=18"
@@ -24,6 +25,7 @@
     "hono": "^4.13.13"
   },
   "devDependencies": {
-    "@x402/fetch": "^2.28.0"
+    "@x402/fetch": "^2.28.0",
+    "ox": "0.14.54"
   }
 }

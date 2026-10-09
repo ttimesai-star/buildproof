@@ -4,7 +4,7 @@
 
 Built for the [BLI Legal Tech Hackathon 2](https://dorahacks.io/hackathon/legal-hack-2026/detail), tracks *LegalTech & RegTech* and *AI x Blockchain*.
 
-> Status: working MVP on a local chain (`anvil`). Testnet deployment (Base Sepolia) is pending test ETH; see [Deployment](#deployment).
+> Status: live on Base mainnet (registry, verify page, paid x402 API), demo records only so far; see [Live on Base](#live-on-base). Every transaction the CLI sends carries BuildProof's Base Builder Code (ERC-8021).
 
 ## The problem
 
@@ -85,6 +85,7 @@ The hosted page (https://ttimesai-star.github.io/buildproof/) can also talk to y
 forge test                                 # 20 tests including fuzzing: signatures, replay, malleability, griefing, amendments
 python checker/tests/test_crosscheck.py    # the cross-check finds exactly the planted problems and nothing else
 node --test api/test/api.test.mjs          # x402 API: 402 price list, paid lookups on a live anvil registry, refused bad payments
+node --test cli/test/attribution.test.mjs  # ERC-8021 suffix vs Base docs, dashboard and ox; registry accepts attributed calls
 ```
 
 ## CLI reference
@@ -123,6 +124,12 @@ Demo record on mainnet: the synthetic acceptance act `examples/pdf/act_01.pdf` (
 ```bash
 BP_RPC=https://mainnet.base.org node cli/buildproof.mjs verify examples/pdf/act_01.pdf
 ```
+
+### Builder Code (ERC-8021)
+
+BuildProof is registered on [Base Dashboard](https://dashboard.base.org/) with the Builder Code `bc_a97tmthu`. The CLI appends the ERC-8021 suffix `0x62635f613937746d7468750b0080218021802180218021802180218021` to the calldata of `register`, `sign`, `relay` (signBySig) and `reject` ([cli/attribution.mjs](cli/attribution.mjs)). The registry ignores trailing calldata, so nothing changed on-chain. Set `BP_BUILDER_CODE` to use other codes, or `none` to send without one. Deployment transactions do not carry the suffix: trailing bytes after the init code would change the creation input that Sourcify matches.
+
+First attributed transactions (synthetic contract `examples/pdf/contract_GC-2026-014.pdf`, attestation `0xf9499d3b…487efd`, ATTESTED): register [`0x04f69900…`](https://basescan.org/tx/0x04f69900d5eef771025baa80dcabfa0daf32fe0d160abd21895a9a5c70bbb209), sign [`0x21823c26…`](https://basescan.org/tx/0x21823c2636f85c03532a6acb4b84855ac82841205c51d9ec08f0f7cbbbd63434). Both show as "8021 Attributed", code `bc_a97tmthu`, in the [Builder Code checker](https://builder-code-checker.vercel.app/).
 
 ## Deployment
 

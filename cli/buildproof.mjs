@@ -6,6 +6,7 @@ import { dirname, join, basename } from "node:path";
 import { fileURLToPath } from "node:url";
 import { ethers } from "ethers";
 import { ABI, DOC_TYPES, STATUS, SIGNER_STATE, SIGN_TYPES, domainFor } from "./abi.mjs";
+import { sendAttributed } from "./attribution.mjs";
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
 
@@ -25,6 +26,8 @@ const HELP = `buildproof <command> [options]
 options: --rpc <url> (env BP_RPC, default http://127.0.0.1:8545)
          --registry <address> (env BP_REGISTRY, else deployments/<chainId>.json)
          --key-env <NAME> env var that holds the private key (default BP_PRIVATE_KEY)
+         env BP_BUILDER_CODE: ERC-8021 builder code(s) appended to tx calldata
+           (default bc_a97tmthu, BuildProof's Base Builder Code; "none" disables)
 types:   ${DOC_TYPES.join(", ")}`;
 
 function parseArgs(argv) {
@@ -92,7 +95,7 @@ async function cmdRegister(file, opt) {
   if (!opt.signers) throw new Error("--signers a,b is required");
   const signers = String(opt.signers).split(",").map((s) => ethers.getAddress(s.trim()));
   const supersedes = opt.supersedes ? opt.supersedes : ethers.ZeroHash;
-  const tx = await reg.register(docHash, type, projectRef(opt.project), supersedes, signers);
+  const tx = await sendAttributed(reg, "register", [docHash, type, projectRef(opt.project), supersedes, signers]);
   const rec = await tx.wait();
   const ev = rec.logs.map((l) => { try { return reg.interface.parseLog(l); } catch { return null; } }).find((e) => e?.name === "Registered");
   console.log(ev.args.id);
@@ -101,7 +104,7 @@ async function cmdRegister(file, opt) {
 
 async function cmdSign(id, opt) {
   const c = await ctx(opt, true);
-  const tx = await need(c.registry).sign(id);
+  const tx = await sendAttributed(need(c.registry), "sign", [id]);
   await tx.wait();
   console.log(`signed ${id} as ${c.wallet.address} (tx ${tx.hash})`);
   await printStatus(c, id);
@@ -130,7 +133,7 @@ async function cmdRelay(file, opt) {
   if (s.registry && c.address && ethers.getAddress(s.registry) !== ethers.getAddress(c.address)) {
     throw new Error(`Signature registry (${s.registry}) does not match target registry (${c.address})`);
   }
-  const tx = await need(c.registry).signBySig(s.attestationId, s.signer, s.signature);
+  const tx = await sendAttributed(need(c.registry), "signBySig", [s.attestationId, s.signer, s.signature]);
   await tx.wait();
   console.log(`relayed signature of ${s.signer} (gas paid by ${c.wallet.address}, tx ${tx.hash})`);
   await printStatus(c, s.attestationId);
@@ -140,7 +143,7 @@ async function cmdReject(id, opt) {
   const c = await ctx(opt, true);
   if (!opt.reason) throw new Error("--reason <file> is required (e.g. the cross-check report)");
   const reasonHash = sha256File(opt.reason);
-  const tx = await need(c.registry).reject(id, reasonHash);
+  const tx = await sendAttributed(need(c.registry), "reject", [id, reasonHash]);
   await tx.wait();
   console.log(`rejected ${id} by ${c.wallet.address}, reason sha256 ${reasonHash} (tx ${tx.hash})`);
 }
