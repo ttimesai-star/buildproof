@@ -130,3 +130,16 @@ npx wrangler secret put NEAR_WEBHOOK_SECRET --config api/wrangler.toml
 ```
 
 Without them the route answers 401 and the cron does nothing. Tests: `node --test api/test/near.test.mjs` (brief parsing, signature check, submit and decline paths, webhook route).
+
+## Listed on the OpenServ x402 marketplace
+
+OpenServ (https://www.openserv.ai) lists paid workflows in a public x402 services catalogue (`GET https://api.openserv.ai/x402-services`, no auth). BuildProof is there as **BuildProof: verify a document attestation on Base**, 0.01 USDC per call: agent `4552` "BuildProof Document Verifier", workflow `13942`, paywall https://platform.openserv.ai/workspace/paywall/5317c4b4c1f6413e8173352640e87325, x402 endpoint `https://api.openserv.ai/webhooks/x402/trigger/5317c4b4c1f6413e8173352640e87325`. Input: `docHash` (one or more SHA-256, 0x + 64 hex) and optional `signers`.
+
+OpenServ takes the payment and sends the task to this Worker as an external agent endpoint (`api/openserv.mjs`):
+
+- `POST /openserv` (the platform posts to `/openserv/`): a `do-task` action. The Worker checks `x-openserv-auth-token` against the stored hash, acknowledges, reads the hashes from the trigger payload (`task.triggerEvent.payload[].event.input`, payment fields skipped), looks them up and completes the task with `PUT /workspaces/{id}/tasks/{taskId}/complete` `{ outputOptionId, output: { type: "text", value } }`. No LLM call, no platform credits.
+- `respond-chat-message`: replies with usage. `GET /openserv/health`: platform health check.
+
+Secrets: `wrangler secret put OPENSERV_API_KEY` and `OPENSERV_AUTH_HASH`; without them `/openserv` answers 503. Provisioning: `scripts/openserv_provision.mjs`, run from a private directory (it writes `.env` with the account wallet key, `.openserv.json` and `openserv_worker_secrets.json` there). The account is a fresh wallet signed in with SIWE: no e-mail, no KYC, no gas.
+
+Checked 2026-10-09: owner-fired trigger with the demo act hash -> task `done`, report `ATTESTED`, 2 of 2 signers. A paid call has not been run. Open point: the trigger stores `x402WalletAddress` = `PAY_TO`, but the preflight (`getTriggerPreflight`) reports the workspace wallet `0xCCEf…3d1D`, which the platform manages; confirm which address receives the first payment.
