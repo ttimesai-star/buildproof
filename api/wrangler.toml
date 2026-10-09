@@ -1,0 +1,16 @@
+# Cloudflare Workers (free plan is enough: 100k requests/day).
+# Deploy: npx wrangler deploy --config api/wrangler.toml   (needs a Cloudflare account, see api/README.md)
+name = "buildproof-x402"
+main = "worker.mjs"
+compatibility_date = "2026-10-01"
+compatibility_flags = ["nodejs_compat"]
+
+[vars]
+PAY_TO = "0xC628715a1ed46eb555B088e3d43dc61AE0134F33"
+PRICE = "$0.01"
+# Payment rail. Testnet: Base Sepolia + public x402.org facilitator.
+X402_NETWORK = "eip155:84532"
+FACILITATOR_URL = "https://x402.org/facilitator"
+# Chain where BuildProofRegistry is deployed (fill in after `node cli/buildproof.mjs deploy`).
+BP_RPC = "https://sepolia.base.org"
+BP_REGISTRY = "0x0000000000000000000000000000000000000000"

@@ -35,6 +35,8 @@ BuildProof does not replace the legal signature required by local law. It adds a
 - **CLI** ([cli/buildproof.mjs](cli/buildproof.mjs)): `hash`, `deploy`, `register`, `sign`, `sign-offline`, `relay`, `reject`, `status`, `verify`.
 - **Verify page** ([docs/](docs/), GitHub Pages). It hashes the file locally with WebCrypto and reads the chain through a public RPC. A party can also sign with a browser wallet (EIP-712) and send the signature to the other side.
 
+- **Paid lookup API for agents** ([api/](api/README.md)). `GET /v1/attestation/{sha256}` returns the verdict (`ATTESTED`, `SUPERSEDED`, `PENDING`, `REJECTED`, `NOT_FOUND`), the signers and the dates. The price is $0.01 in USDC per request over [x402](https://docs.x402.org). The service is read-only and holds no key. It runs as a Cloudflare Worker or with Node.
+
 ## Demo
 
 All documents in [examples/](examples/) are **synthetic** with fictional parties (`Alder Street Development Ltd.` as client, `Granite & Beam Construction LLC` as contractor, invalid test IBANs). The PDFs are byte-reproducible from [examples/source/documents.json](examples/source/documents.json).
@@ -82,6 +84,7 @@ The hosted page (https://ttimesai-star.github.io/buildproof/) can also talk to y
 ```bash
 forge test                                 # 20 tests including fuzzing: signatures, replay, malleability, griefing, amendments
 python checker/tests/test_crosscheck.py    # the cross-check finds exactly the planted problems and nothing else
+node --test api/test/api.test.mjs          # x402 API: 402 price list, paid lookups on a live anvil registry, refused bad payments
 ```
 
 ## CLI reference

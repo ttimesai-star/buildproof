@@ -1,0 +1,96 @@
+# BuildProof paid lookup API (x402)
+
+An AI agent (or any HTTP client) sends the SHA-256 of a document and gets back whether it was attested in `BuildProofRegistry`: who signed, when, whether a party rejected it, and whether a later supplementary agreement superseded it. Each answer costs **$0.01 in USDC**, paid over [x402](https://docs.x402.org): no account, no API key, the payment is the authentication.
+
+```
+GET /v1/attestation/{sha256}?signers=0xClient,0xContractor
+  -> 402 Payment Required   (PAYMENT-REQUIRED header: exact scheme, USDC, amount 10000, payTo)
+  -> client signs an EIP-3009 USDC authorization, retries with PAYMENT-SIGNATURE
+  -> 200 + JSON + PAYMENT-RESPONSE (settlement tx)
+```
+
+The service is read-only. It holds **no private key** and never sends a transaction: the buyer signs the USDC transfer, a facilitator submits it and pays the gas, and the USDC goes straight to `PAY_TO`. A malformed hash or signer list returns `400` before any price is quoted, and a failed registry read returns `502`, which the x402 middleware never settles, so the buyer is not charged for it.
+
+Free routes: `GET /` (service info), `GET /openapi.json`, `GET /health`.
+
+## Response
+
+```json
+{
+  "docHash": "0x…",
+  "chainId": 84532,
+  "registry": "0x…",
+  "verdict": "ATTESTED | SUPERSEDED | PENDING | REJECTED | NOT_FOUND | NO_MATCHING_SIGNERS",
+  "attestations": [{
+    "id": "0x…", "docType": "acceptance-act", "status": "ATTESTED",
+    "superseded": false, "supersededBy": null, "supersedes": null,
+    "registrar": "0x…", "registeredAt": "2026-10-09T12:00:00.000Z", "closedAt": "2026-10-09T12:00:04.000Z",
+    "signedCount": 2, "signerCount": 2,
+    "signers": [{ "address": "0x…", "state": "signed" }, { "address": "0x…", "state": "signed" }],
+    "matchesExpectedSigners": true
+  }]
+}
+```
+
+Anyone can register any hash with any signer list, so pass `?signers=` with the parties you expect. Then the verdict counts only records whose signer set is exactly that list (a stranger's fake record shows up, but with `matchesExpectedSigners: false`).
+
+## Configuration
+
+| Variable | Default | Meaning |
+|---|---|---|
+| `PAY_TO` | `0xC628715a1ed46eb555B088e3d43dc61AE0134F33` | where USDC is paid |
+| `PRICE` | `$0.01` | price per lookup |
+| `X402_NETWORK` | `eip155:84532` (Base Sepolia) | payment chain, CAIP-2; production `eip155:8453` (Base) |
+| `FACILITATOR_URL` | `https://x402.org/facilitator` | verifies and settles payments; testnet only, see below |
+| `BP_RPC`, `BP_REGISTRY` | (required) | chain and address of the registry being queried |
+| `PUBLIC_URL` | (empty) | base URL written into `openapi.json` |
+
+The payment chain and the registry chain are independent: payment can be on Base mainnet while the registry is still on a testnet.
+
+## Run locally
+
+```bash
+npm install
+anvil &                                   # or point BP_RPC at a public chain
+bash scripts/demo.sh                      # deploys the registry, writes deployments/31337.json
+node api/server.mjs                       # http://localhost:8787
+curl -i http://localhost:8787/v1/attestation/$(node cli/buildproof.mjs hash examples/pdf/act_01.pdf)
+```
+
+## Tests
+
+```bash
+forge build
+node --test api/test/api.test.mjs         # set ANVIL_BIN if anvil is not on PATH
+```
+
+The test starts anvil, deploys the real registry, registers a contract, its amendment, a clean act, a rejected act, a pending act and a stranger's fake record. A real x402 buyer client (`@x402/fetch` + `@x402/evm`) pays every request with an EIP-3009 signature. An in-process facilitator checks that signature the way a real facilitator does and records the settlement. Checked: the 402 price list (USDC on Base Sepolia, 10000 units, our `payTo`), no charge for malformed input, each verdict, the signer filter, the amendment link, and refusal of a payment addressed to someone else.
+
+## Deploy to Cloudflare Workers (free plan)
+
+The Worker needs a Cloudflare account (e-mail sign-up). The free plan (100,000 requests a day) needs no card. No secrets are required, because the service holds no key.
+
+```bash
+npx wrangler login
+# edit api/wrangler.toml: BP_RPC / BP_REGISTRY of the deployed registry, PUBLIC_URL
+npx wrangler deploy --config api/wrangler.toml
+curl -i https://buildproof-x402.<your-subdomain>.workers.dev/v1/attestation/0x…   # expect 402
+```
+
+`nodejs_compat` is enabled in `wrangler.toml` (one dependency imports `url`). The bundle is about 1.4 MB before compression, well under the free-plan limit. CI checks that it bundles.
+
+Alternative without Cloudflare: any Node 20+ host running `node api/server.mjs`.
+
+## Facilitators for mainnet
+
+`x402.org/facilitator` serves testnets only (Base Sepolia, Solana devnet). For Base mainnet set `FACILITATOR_URL` to a production facilitator. Options listed in the [x402 docs](https://docs.x402.org/dev-tools/facilitators):
+
+- **PayAI** (`https://facilitator.payai.network`): "No API keys required". Its `/supported` lists `eip155:8453` exact.
+- **Circle Facilitator Service** (`https://api.circle.com/v1/facilitator/x402/...`): a keyless trial, then a Circle API key. Each call needs a `Facilitator-Seller-Proof` header, an EIP-712 signature by the key that controls `payTo`. That means the server would have to hold the payout key, so this adapter is not included on purpose.
+- **Coinbase CDP**: needs a CDP API key (account).
+
+Every facilitator screens the payer and the payee. Check its terms for your jurisdiction before going to mainnet.
+
+## Listing in the Circle Agent Marketplace
+
+The marketplace takes a live x402 endpoint, an OpenAPI spec (`/openapi.json`) and a payout wallet, which is sanctions-screened. Submission is a form, reviewed manually: https://developers.circle.com/agent-stack/agent-marketplace/get-listed
