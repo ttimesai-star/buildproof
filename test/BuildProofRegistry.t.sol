@@ -260,6 +260,26 @@ contract BuildProofRegistryTest is Test {
         _register(keccak256("sa2"), 2, contractId, client);
     }
 
+    function test_RevertWhen_SecondPendingAmendmentAttested() public {
+        bytes32 contractId = _register(keccak256("contract"), 1, bytes32(0), client);
+        _attest(contractId);
+
+        // Register two amendments while contract is attested and supersededBy is 0
+        bytes32 sa1 = _register(keccak256("sa1"), 2, contractId, client);
+        bytes32 sa2 = _register(keccak256("sa2"), 2, contractId, client);
+
+        // Complete sa1 first -> contractId supersededBy sa1
+        _attest(sa1);
+        assertEq(reg.supersededBy(contractId), sa1);
+
+        // Complete sa2 -> should revert when the second amendment tries to attest and supersede contractId
+        vm.prank(client);
+        reg.sign(sa2);
+        vm.prank(contractor);
+        vm.expectRevert(abi.encodeWithSelector(BuildProofRegistry.BadSupersedes.selector, contractId));
+        reg.sign(sa2);
+    }
+
     // ------------------------------------------------------------ fuzz
 
     function testFuzz_OnlyListedSignersCanSign(address who) public {

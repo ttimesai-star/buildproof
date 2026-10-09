@@ -35,7 +35,19 @@ def pdf_text(path):
 
 
 def _num(s):
-    return float(s.replace(",", "").replace(" ", ""))
+    s = str(s).strip().replace(" ", "").replace("\xa0", "")
+    if "." in s and "," in s:
+        if s.rfind(",") > s.rfind("."):
+            s = s.replace(".", "").replace(",", ".")
+        else:
+            s = s.replace(",", "")
+    elif "," in s:
+        parts = s.split(",")
+        if len(parts) > 2:
+            s = s.replace(",", "")
+        else:
+            s = s.replace(",", ".")
+    return float(s)
 
 
 def _party(text, label):
