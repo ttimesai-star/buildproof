@@ -75,6 +75,8 @@ Then open the verify page against the same local chain:
 python -m http.server 8000 --directory docs   # open http://localhost:8000, choose "Local anvil"
 ```
 
+The hosted page (https://ttimesai-star.github.io/buildproof/) can also talk to your local anvil, but Chrome will ask for permission to access devices on your local network; allow it, or use the local server above.
+
 ## Tests
 
 ```bash
