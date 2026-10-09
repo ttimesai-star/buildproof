@@ -8,9 +8,9 @@
     "buildproof": "cli/buildproof.mjs"
   },
   "scripts": {
-    "test": "forge test && python checker/tests/test_crosscheck.py && node --test api/test/api.test.mjs cli/test/attribution.test.mjs",
+    "test": "forge test && python checker/tests/test_crosscheck.py && node --test api/test/api.test.mjs api/test/near.test.mjs cli/test/attribution.test.mjs",
     "demo": "bash scripts/demo.sh",
-    "test:api": "node --test api/test/api.test.mjs",
+    "test:api": "node --test api/test/api.test.mjs api/test/near.test.mjs",
     "api": "node api/server.mjs",
     "test:cli": "node --test cli/test/attribution.test.mjs"
   },

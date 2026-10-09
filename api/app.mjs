@@ -9,6 +9,7 @@ import { paymentMiddleware, x402ResourceServer } from "@x402/hono";
 import { HTTPFacilitatorClient } from "@x402/core/server";
 import { ExactEvmScheme } from "@x402/evm/exact/server";
 import { lookupDocument, parseSigners, HASH_RE } from "./lookup.mjs";
+import { mountNear, nearDeps } from "./near.mjs";
 
 export const DEFAULTS = {
   PAY_TO: "0xC628715a1ed46eb555B088e3d43dc61AE0134F33",
@@ -78,7 +79,7 @@ export function openapi(cfg) {
 /**
  * Build the Hono app.
  * @param {object} cfg from configFrom()
- * @param {object} [deps] { facilitator?: FacilitatorClient, provider?: ethers.Provider }
+ * @param {object} [deps] { facilitator?: FacilitatorClient, provider?: ethers.Provider, fetch?: typeof fetch }
  */
 export function createApp(cfg, deps = {}) {
   const facilitator = deps.facilitator ?? new HTTPFacilitatorClient({ url: cfg.FACILITATOR_URL });
@@ -101,6 +102,15 @@ export function createApp(cfg, deps = {}) {
   );
   app.get("/openapi.json", (c) => c.json(openapi(cfg)));
   app.get("/health", (c) => c.json({ ok: true }));
+
+  // NEAR AI Agent Market backend (see near.mjs). Mounted before the x402 middleware:
+  // the marketplace already took the caller's payment, and the route checks its own HMAC.
+  app.provider = provider;
+  mountNear(
+    app,
+    (c) => nearDeps(c.env ?? {}, cfg, provider, deps.fetch),
+    (c) => c.env?.NEAR_WEBHOOK_SECRET,
+  );
 
   // Validate before asking for money: a malformed request is never charged.
   app.use("/v1/attestation/*", async (c, next) => {

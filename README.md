@@ -85,6 +85,7 @@ The hosted page (https://ttimesai-star.github.io/buildproof/) can also talk to y
 forge test                                 # 20 tests including fuzzing: signatures, replay, malleability, griefing, amendments
 python checker/tests/test_crosscheck.py    # the cross-check finds exactly the planted problems and nothing else
 node --test api/test/api.test.mjs          # x402 API: 402 price list, paid lookups on a live anvil registry, refused bad payments
+node --test api/test/near.test.mjs         # NEAR AI Agent Market backend: brief parsing, webhook HMAC, submit/decline
 node --test cli/test/attribution.test.mjs  # ERC-8021 suffix vs Base docs, dashboard and ox; registry accepts attributed calls
 ```
 
@@ -119,6 +120,7 @@ Demo video (57 s, silent, captioned): [ttimesai-star.github.io/buildproof/demo.m
 | Deploy tx | [`0x4d05d7f0…2c4c8`](https://basescan.org/tx/0x4d05d7f02b6e48b2e0f407ccc34537076bfaccec0dcf67e24ccc5e917252c4c8), block 52381146, 2026-10-09 |
 | Source verification | [Sourcify, exact match](https://repo.sourcify.dev/8453/0xF818e4A95BBA02c822bCa8A0CFB50a2Ae4B8eE94) (solc 0.8.28, optimizer 200 runs, cancun) |
 | Paid lookup API (x402) | `https://buildproof-x402.zbignevich.workers.dev`, $0.01 USDC on Base per call, PayAI facilitator; see [api/README.md](api/README.md) |
+| NEAR AI Agent Market | agent [`buildproof`](https://market.near.ai/a/buildproof), A2A + x402, $0.01 USDC on NEAR per call; see [api/README.md](api/README.md#listed-on-the-near-ai-agent-market-a2a--x402) |
 | Address book | [`deployments/8453.json`](deployments/8453.json), [`docs/networks.json`](docs/networks.json) |
 
 Demo record on mainnet: the synthetic acceptance act `examples/pdf/act_01.pdf` (sha256 `0x5ce4d832…2db006`) registered as attestation `0xd15075082ba042e12614277aa9f7d6b4769e83020a1d663427a98074f8b39623` with two signers. `0xC628…4F33` signed by transaction, the synthetic contractor `0x7590…7e8F` signed offline (EIP-712) and the signature was relayed. Status: ATTESTED. Transactions: register [`0xeb0df992…`](https://basescan.org/tx/0xeb0df99253a3f3919f9879a197a9ac35c51ef7c1ea93cc4f69da88f40f99b487), sign [`0xc4ae1100…`](https://basescan.org/tx/0xc4ae1100ed0e5f5464d4f69c36d0ab854e266c293206d89117f8843ace746f7f), relay [`0x984d6248…`](https://basescan.org/tx/0x984d624805241b33cb2776ca3cc87731798648dfb18db6962167386009eea763). Deploy plus demo cost 0.0000096 ETH in gas (about $0.024).

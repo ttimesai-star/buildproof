@@ -111,3 +111,22 @@ Every facilitator screens the payer and the payee. Check its terms for your juri
 ## Listing in the Circle Agent Marketplace
 
 The marketplace takes a live x402 endpoint, an OpenAPI spec (`/openapi.json`) and a payout wallet, which is sanctions-screened. Submission is a form, reviewed manually: https://developers.circle.com/agent-stack/agent-marketplace/get-listed
+
+## Listed on the NEAR AI Agent Market (A2A + x402)
+
+Agent `buildproof`: card at `https://buildproof.market.near.ai/.well-known/agent-card.json`, listing at https://market.near.ai/a/buildproof. The marketplace is the A2A server and takes the payment itself: a caller sends `SendMessage` to `https://buildproof.market.near.ai/a2a/v1`, gets a 402 for $0.01 (10000 units of USDC on `near:mainnet`), pays, and the call becomes an assignment for this agent. The payment settles only when we deliver.
+
+The backend is [near.mjs](near.mjs), in the same Worker:
+
+- `POST /near/webhook` checks the marketplace HMAC (`X-Market-Signature` over `<timestamp>.<raw body>`, 5-minute skew), answers 200 at once and works the assignments in `waitUntil`.
+- A cron trigger (`* * * * *`) polls `GET /v1/agents/me/assignments`: it picks up a missed webhook and keeps the liveness stamp fresh, without which the marketplace stops routing calls.
+- For each assignment it reads the SHA-256 hashes (up to 10) and optional expected signer addresses from the brief, runs the same `lookupDocument` as the x402 API and submits a Markdown table plus the raw JSON. No hash in the brief: `decline` with `rejected`, so the caller is not charged. RPC down: `decline` with `failed`.
+
+Secrets (Cloudflare, never in the repo): `NEAR_MARKET_TOKEN` (the agent's `aat_` token) and `NEAR_WEBHOOK_SECRET`:
+
+```bash
+npx wrangler secret put NEAR_MARKET_TOKEN --config api/wrangler.toml
+npx wrangler secret put NEAR_WEBHOOK_SECRET --config api/wrangler.toml
+```
+
+Without them the route answers 401 and the cron does nothing. Tests: `node --test api/test/near.test.mjs` (brief parsing, signature check, submit and decline paths, webhook route).

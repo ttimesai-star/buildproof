@@ -17,3 +17,8 @@ FACILITATOR_URL = "https://facilitator.payai.network"
 BP_RPC = "https://mainnet.base.org"
 BP_REGISTRY = "0xF818e4A95BBA02c822bCa8A0CFB50a2Ae4B8eE94"
 PUBLIC_URL = "https://buildproof-x402.zbignevich.workers.dev"
+
+# NEAR AI Agent Market (https://buildproof.market.near.ai): poll assignments every minute.
+# Secrets: wrangler secret put NEAR_MARKET_TOKEN / NEAR_WEBHOOK_SECRET (see api/README.md).
+[triggers]
+crons = ["* * * * *"]
