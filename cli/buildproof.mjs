@@ -212,7 +212,8 @@ async function main() {
   switch (cmd) {
     case "hash": console.log(sha256File(pos[0])); break;
     case "manifest":
-      console.log(
+      // no trailing newline: `manifest ... > m.json` must reproduce the exact bytes that get hashed
+      process.stdout.write(
         buildManifest({
           model: opt.model,
           promptFile: opt.prompt,
