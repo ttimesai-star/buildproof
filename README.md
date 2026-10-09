@@ -111,6 +111,8 @@ python checker/crosscheck.py scans/*.pdf --llm-only          # rules on LLM-extr
 
 ## Live on Base
 
+Demo video (57 s, silent, captioned): [ttimesai-star.github.io/buildproof/demo.mp4](https://ttimesai-star.github.io/buildproof/demo.mp4). It records the live verify page, the live x402 quote and the Builder Code check on mainnet.
+
 | | |
 |---|---|
 | Registry (Base mainnet, chainId 8453) | [`0xF818e4A95BBA02c822bCa8A0CFB50a2Ae4B8eE94`](https://basescan.org/address/0xF818e4A95BBA02c822bCa8A0CFB50a2Ae4B8eE94) |
