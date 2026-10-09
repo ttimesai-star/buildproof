@@ -1,0 +1,1 @@
+Analyze the attached Mutual Non-Disclosure Agreement (nda_mutual.pdf) for legal risk. Identify term, confidentiality scope, governing law, carve-outs, and notable risk points.

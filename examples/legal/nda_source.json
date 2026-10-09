@@ -1,0 +1,42 @@
+{
+  "notice": "SYNTHETIC EXAMPLE - fictional parties, not a real document",
+  "title": "MUTUAL NON-DISCLOSURE AGREEMENT",
+  "date": "2026-10-01",
+  "effective_date": "2026-10-01",
+  "term": "2 years",
+  "governing_law": "State of Delaware",
+  "parties": {
+    "party_a": {
+      "name": "Northwind Analytics Ltd.",
+      "registration": "12345678",
+      "address": "100 Synthetic Way, Suite 200, Wilmington, DE 19801"
+    },
+    "party_b": {
+      "name": "Bluefin Legal Services LLC",
+      "registration": "87654321",
+      "address": "500 Fictional Plaza, Floor 12, Dover, DE 19901"
+    }
+  },
+  "sections": [
+    {
+      "heading": "1. Purpose",
+      "body": "The parties wish to explore a potential business relationship concerning AI legal technology tools ('Purpose'). In connection with the Purpose, each party may disclose confidential technical, financial, and business information to the other."
+    },
+    {
+      "heading": "2. Confidential Information",
+      "body": "'Confidential Information' means all non-public information disclosed by a party ('Disclosing Party') to the other party ('Receiving Party') that is designated as confidential or reasonably should be understood to be confidential given the nature of the information and circumstances of disclosure."
+    },
+    {
+      "heading": "3. Exclusions",
+      "body": "Confidential Information does not include information that: (a) is or becomes publicly known through no breach of this Agreement; (b) was already known to the Receiving Party prior to disclosure; (c) is independently developed without reference to Confidential Information; or (d) is rightfully received from a third party without duty of confidentiality."
+    },
+    {
+      "heading": "4. Obligations",
+      "body": "The Receiving Party agrees to protect Confidential Information using the same degree of care it uses for its own confidential information of like nature, but no less than reasonable care, and shall use Confidential Information solely for the Purpose."
+    },
+    {
+      "heading": "5. Term & Governing Law",
+      "body": "This Agreement shall remain in effect for 2 years from the Effective Date. This Agreement is governed by the laws of the State of Delaware, without regard to conflict of law principles."
+    }
+  ]
+}

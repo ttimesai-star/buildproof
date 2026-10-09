@@ -5,7 +5,7 @@ const ABI = [
   "function attestationsOf(bytes32 docHash) view returns (bytes32[])",
   "function supersededBy(bytes32 id) view returns (bytes32)",
 ];
-const DOC_TYPES = ["other", "contract", "supplementary agreement", "acceptance act", "as-built documentation", "invoice"];
+const DOC_TYPES = ["other", "contract", "supplementary agreement", "acceptance act", "as-built documentation", "invoice", "NDA", "AI-generated legal output"];
 const STATUS = ["none", "pending", "attested", "rejected"];
 const SIGNER_STATE = ["-", "awaiting signature", "signed", "rejected"];
 const $ = (id) => document.getElementById(id);

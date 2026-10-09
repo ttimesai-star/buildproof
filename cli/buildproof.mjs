@@ -7,12 +7,15 @@ import { fileURLToPath } from "node:url";
 import { ethers } from "ethers";
 import { ABI, DOC_TYPES, STATUS, SIGNER_STATE, SIGN_TYPES, domainFor } from "./abi.mjs";
 import { sendAttributed } from "./attribution.mjs";
+import { buildManifest } from "./manifest.mjs";
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
 
 const HELP = `buildproof <command> [options]
 
   hash <file>                                  SHA-256 of the exact file bytes
+  manifest --model M --prompt F --input F [--input F] --output F --created YYYY-MM-DD
+                                               build canonical AI-output review manifest
   deploy                                       deploy BuildProofRegistry, save deployments/<chainId>.json
   register <file> --type <t> --signers a,b     register a document; prints the attestation id
            [--project <ref>] [--supersedes <id>]
@@ -33,8 +36,16 @@ types:   ${DOC_TYPES.join(", ")}`;
 function parseArgs(argv) {
   const pos = [], opt = {};
   for (let i = 0; i < argv.length; i++) {
-    if (argv[i].startsWith("--")) opt[argv[i].slice(2)] = argv[i + 1]?.startsWith("--") || argv[i + 1] === undefined ? true : argv[++i];
-    else pos.push(argv[i]);
+    if (argv[i].startsWith("--")) {
+      const key = argv[i].slice(2);
+      const val = argv[i + 1]?.startsWith("--") || argv[i + 1] === undefined ? true : argv[++i];
+      if (opt[key] !== undefined) {
+        if (Array.isArray(opt[key])) opt[key].push(val);
+        else opt[key] = [opt[key], val];
+      } else {
+        opt[key] = val;
+      }
+    } else pos.push(argv[i]);
   }
   return { pos, opt };
 }
@@ -200,6 +211,17 @@ async function main() {
   const { pos, opt } = parseArgs(rest);
   switch (cmd) {
     case "hash": console.log(sha256File(pos[0])); break;
+    case "manifest":
+      console.log(
+        buildManifest({
+          model: opt.model,
+          promptFile: opt.prompt,
+          inputFiles: opt.input,
+          outputFile: opt.output,
+          created: opt.created,
+        })
+      );
+      break;
     case "deploy": await cmdDeploy(opt); break;
     case "register": await cmdRegister(pos[0], opt); break;
     case "sign": await cmdSign(pos[0], opt); break;
