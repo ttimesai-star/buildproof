@@ -10,6 +10,7 @@ import { HTTPFacilitatorClient } from "@x402/core/server";
 import { ExactEvmScheme } from "@x402/evm/exact/server";
 import { lookupDocument, parseSigners, HASH_RE } from "./lookup.mjs";
 import { mountNear, nearDeps } from "./near.mjs";
+import { mountOpenServ, openservDeps } from "./openserv.mjs";
 
 export const DEFAULTS = {
   PAY_TO: "0xC628715a1ed46eb555B088e3d43dc61AE0134F33",
@@ -111,6 +112,9 @@ export function createApp(cfg, deps = {}) {
     (c) => nearDeps(c.env ?? {}, cfg, provider, deps.fetch),
     (c) => c.env?.NEAR_WEBHOOK_SECRET,
   );
+  // OpenServ x402 marketplace agent endpoint (see openserv.mjs): the platform took the
+  // caller's payment and authenticates itself with the saved auth-token hash.
+  mountOpenServ(app, (c) => openservDeps(c.env ?? {}, cfg, provider, deps.fetch));
 
   // Validate before asking for money: a malformed request is never charged.
   app.use("/v1/attestation/*", async (c, next) => {

@@ -17,7 +17,7 @@ jobs:
       - run: python examples/legal/make_nda.py && git diff --exit-code examples/legal
       - run: python checker/tests/test_crosscheck.py
       - run: npm ci
-      - run: node --test api/test/api.test.mjs
+      - run: node --test api/test/api.test.mjs api/test/near.test.mjs api/test/openserv.test.mjs
       - run: node --test cli/test/attribution.test.mjs cli/test/legal.test.mjs
       - run: npx --yes esbuild@0.25.0 api/worker.mjs --bundle --format=esm --platform=browser --conditions=worker,browser --external:url --external:"node:*" --outfile=/tmp/worker.js
       - run: bash scripts/demo.sh
