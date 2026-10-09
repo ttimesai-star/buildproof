@@ -41,6 +41,23 @@ function parties() {
   return m;
 }
 
+async function rpcChainId(url) {
+  const ctl = new AbortController();
+  const t = setTimeout(() => ctl.abort(), 6000);
+  try {
+    const r = await fetch(url, { method: "POST", headers: { "content-type": "application/json" }, signal: ctl.signal,
+      body: JSON.stringify({ jsonrpc: "2.0", id: 1, method: "eth_chainId", params: [] }) });
+    return Number((await r.json()).result);
+  } catch { throw new Error(`RPC ${url} is not reachable. For "Local anvil" run scripts/demo.sh on this computer first.`); }
+  finally { clearTimeout(t); }
+}
+
+async function makeProvider() {
+  const url = $("rpc").value.trim();
+  const chainId = await rpcChainId(url);
+  return new ethers.JsonRpcProvider(url, chainId, { staticNetwork: true });
+}
+
 const when = (t) => (Number(t) ? new Date(Number(t) * 1000).toISOString().replace("T", " ").replace(".000Z", " UTC") : "-");
 
 async function verify() {
@@ -49,7 +66,8 @@ async function verify() {
   if (!/^0x[0-9a-fA-F]{64}$/.test(hash)) { out.innerHTML = `<div class="card bad">Enter a file or a 0x-prefixed 64-hex SHA-256 hash.</div>`; return; }
   out.innerHTML = `<div class="card muted">Looking up ${esc(hash)}...</div>`;
   try {
-    const provider = new ethers.JsonRpcProvider($("rpc").value.trim());
+    const provider = await makeProvider();
+    if ((await provider.getCode($("reg").value.trim())) === "0x") throw new Error("No registry contract at this address on this network.");
     const reg = new ethers.Contract($("reg").value.trim(), ABI, provider);
     const ids = await reg.attestationsOf(hash);
     const known = parties();
@@ -98,7 +116,7 @@ async function signAsParty() {
     const signer = await bp.getSigner();
     const { chainId } = await bp.getNetwork();
     const regAddr = $("reg").value.trim();
-    const reg = new ethers.Contract(regAddr, ABI, new ethers.JsonRpcProvider($("rpc").value.trim()));
+    const reg = new ethers.Contract(regAddr, ABI, await makeProvider());
     const a = await reg.getAttestation(id);
     if (Number(a.status) !== 1) throw new Error("This attestation is not pending.");
     if ($("hash").value.trim() && $("hash").value.trim().toLowerCase() !== a.docHash.toLowerCase())
