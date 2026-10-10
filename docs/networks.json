@@ -4,6 +4,6 @@
     "chainId": 8453,
     "rpc": "https://mainnet.base.org",
     "registry": "0xF818e4A95BBA02c822bCa8A0CFB50a2Ae4B8eE94",
-    "note": "Deployed 2026-10-09, source verified on Sourcify (exact match). Demo record: examples/pdf/act_01.pdf, signers 0xC628715a1ed46eb555B088e3d43dc61AE0134F33 and 0x7590D6cc6D35B0798916638725CBc0DBA4777e8F."
+    "note": "Deployed 2026-10-09, source verified on Sourcify (exact match). Demo record: examples/pdf/act_01.pdf, signers 0xC628715a1ed46eb555B088e3d43dc61AE0134F33 and 0x7590D6cc6D35B0798916638725CBc0DBA4777e8F. AI-output demo: examples/legal/ai_review_manifest.json, attestation 0x87580bfb…26ad12e, AI operator 0x7590D6cc6D35B0798916638725CBc0DBA4777e8F and human reviewer 0xC628715a1ed46eb555B088e3d43dc61AE0134F33, ATTESTED."
   }
 ]

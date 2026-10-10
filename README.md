@@ -165,6 +165,12 @@ Demo record on mainnet: the synthetic acceptance act `examples/pdf/act_01.pdf` (
 BP_RPC=https://mainnet.base.org node cli/buildproof.mjs verify examples/pdf/act_01.pdf
 ```
 
+AI-output manifest on mainnet: the synthetic review manifest `examples/legal/ai_review_manifest.json` (sha256 `0x60728c3f…7b8bc8`, type `ai-output`, project `LEGAL-2026`) registered as attestation `0x87580bfb0353da1df37d935220f0ead6388d550fa3d06571d9210abab26ad12e` with two required signers: the AI operator `0x7590…7e8F` (demo key, signed offline with EIP-712, signature relayed) and the human reviewer `0xC628…4F33` (signed by transaction). Status: ATTESTED, 2026-10-10. Transactions: register [`0x38c7eef6…`](https://basescan.org/tx/0x38c7eef6b030704a2601a6987146162a0339d5bd0f91c7a6ecadf7da288ccad0), relay (AI operator) [`0x8662ee13…`](https://basescan.org/tx/0x8662ee133deb3a748bacd017a5b78670899b88789b511790224da2f99e751a2d), sign (human reviewer) [`0xf779a3e5…`](https://basescan.org/tx/0xf779a3e5def5a81b440c69c5aadba8a9eaa5a6e2b0d9aac3d0319f1d86f4b25d). Gas for all three: 0.0000021930 ETH (about $0.005).
+
+```bash
+BP_RPC=https://mainnet.base.org node cli/buildproof.mjs verify examples/legal/ai_review_manifest.json
+```
+
 ### Builder Code (ERC-8021)
 
 BuildProof is registered on [Base Dashboard](https://dashboard.base.org/) with the Builder Code `bc_a97tmthu`. The CLI appends the ERC-8021 suffix `0x62635f613937746d7468750b0080218021802180218021802180218021` to the calldata of `register`, `sign`, `relay` (signBySig) and `reject` ([cli/attribution.mjs](cli/attribution.mjs)). The registry ignores trailing calldata, so nothing changed on-chain. Set `BP_BUILDER_CODE` to use other codes, or `none` to send without one. Deployment transactions do not carry the suffix: trailing bytes after the init code would change the creation input that Sourcify matches.
