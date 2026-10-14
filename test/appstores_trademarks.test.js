@@ -38,7 +38,7 @@ test('Google Play unknown layout is unconfirmed, not "none found"', async () => 
 });
 
 test('Google Play "No results for" is a confirmed none, suggestions ignored', async () => {
-  const html = 'No results for Zzq Here are some apps you might like <a href="/store/apps/details?id=z.q" aria-label="Zzq" class="x"></a>';
+  const html = 'No results for Zzq Here are some apps you might like <a href="/store/apps/details?id=z.q" aria-label="Other App" class="x"></a>';
   const fetch = fakeFetch([['https://play.google.com/', { status: 200, body: html }]]);
   const r = await checkPlayStore('Zzq', { fetch });
   assert.equal(r.status, STATUS.AVAILABLE);
@@ -51,9 +51,24 @@ test('trademark similarity', () => {
   assert.equal(similarity('NOTION LABS', 'Notion'), 'contains the name');
   assert.equal(similarity('MOTION', 'Notion'), 'very similar');
   assert.equal(similarity('BANANA', 'Notion'), null);
-  assert.equal(similarity('ACE', 'Acme'), null);
+  assert.equal(similarity('AKME', 'Acme'), 'very similar');
+  assert.equal(similarity('IBM', 'IPM'), null);
   assert.equal(similarity('PURVELA', 'Quorvela'), null);
   assert.equal(similarity('QUORVELLA', 'Quorvela'), 'very similar');
+  assert.equal(similarity('ACME', 'Acme Labs'), 'contained in the name');
+});
+
+test('isSameName never matches an empty name', () => {
+  assert.ok(!isSameName('Anything', '!!!'));
+  assert.ok(!isSameName('', 'Acme'));
+});
+
+test('Google Play: an exact match beats the "No results for" banner', async () => {
+  const html = 'No results for Acme <a href="/store/apps/details?id=a.c" aria-label="Acme: Tasks" class="x"></a>';
+  const fetch = fakeFetch([['https://play.google.com/', { status: 200, body: html }]]);
+  const r = await checkPlayStore('Acme', { fetch });
+  assert.equal(r.status, STATUS.TAKEN);
+  assert.equal(r.matches[0].id, 'a.c');
 });
 
 test('USPTO parse: live first, serial, registration number and status kept', () => {

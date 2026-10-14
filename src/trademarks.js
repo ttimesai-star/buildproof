@@ -21,9 +21,10 @@ export function similarity(mark, name) {
   const b = normalize(name);
   if (!a || !b) return null;
   if (a === b) return 'identical';
-  const limit = b.length <= 4 ? 0 : b.length <= 8 ? 1 : 2;
+  const limit = b.length <= 3 ? 0 : b.length <= 8 ? 1 : 2;
   if (levenshtein(a, b) <= limit) return 'very similar';
   if (b.length >= 4 && (a.startsWith(b) || a.endsWith(b))) return 'contains the name';
+  if (a.length >= 4 && (b.startsWith(a) || b.endsWith(a))) return 'contained in the name';
   return null;
 }
 
@@ -63,7 +64,7 @@ export function parseUspto(json, name) {
       link: `https://tsdr.uspto.gov/#caseNumber=${s.id || h.id}&caseType=SERIAL_NO&searchType=statusSearch`,
     });
   }
-  const rank = { identical: 0, 'very similar': 1, 'contains the name': 2 };
+  const rank = { identical: 0, 'very similar': 1, 'contains the name': 2, 'contained in the name': 3 };
   rows.sort((x, y) => (x.status === y.status ? 0 : x.status === 'LIVE' ? -1 : 1) || rank[x.similarity] - rank[y.similarity]);
   return rows;
 }

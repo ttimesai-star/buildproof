@@ -4,7 +4,13 @@ export const DISCLAIMER =
   'Trademark results are a starting point, not legal advice. Whether a mark is "too similar" is a legal judgment; ' +
   'ask a trademark attorney before relying on a name. Availability can change at any moment and is accurate only at the time shown.';
 
-const esc = (s) => String(s ?? '').replace(/\|/g, '\\|').replace(/\n/g, ' ');
+// Text from registries, stores and trademark owners goes into the report, so
+// characters that could form links, images, HTML or table cells are escaped.
+// Dots, hyphens and parentheses stay as they are (domains and owner names).
+export const esc = (s) =>
+  String(s ?? '')
+    .replace(/[\\`*_[\]<>|!#]/g, '\\$&')
+    .replace(/[\r\n]+/g, ' ');
 
 function domainTable(rows) {
   const lines = ['| Domain | Result | Source | Checked (UTC) |', '|---|---|---|---|'];

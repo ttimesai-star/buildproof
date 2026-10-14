@@ -56,11 +56,12 @@ The tests use a fake `fetch` and need no network.
 
 - Availability can change at any moment; results hold only at the time shown.
 - Instagram, TikTok, X and Reddit throttle or block automated lookups from some networks. When that happens the report says "couldn't confirm".
+- The .io WHOIS server rate-limits repeated queries; when it does not answer in time the domain is reported as "couldn't confirm".
 - Trademark results are a starting point, not legal advice.
 
 ## Disclosure
 
-Written with an AI coding agent (Claude) and reviewed before release.
+Written with an AI coding agent (Claude). A second AI reviewer (Google Jules) audited v0.1; its findings on WHOIS ordering, Google Play parsing, Markdown escaping, socket cleanup, bootstrap caching and trademark similarity are fixed in v0.1.1.
 
 ## License
 

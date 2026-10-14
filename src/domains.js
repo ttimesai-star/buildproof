@@ -38,24 +38,31 @@ const WHOIS_FREE = [
 const WHOIS_TAKEN_STRONG = [/^\s*registrar:\s*\S+/im, /^\s*creation date:\s*\S+/im, /^\s*status:\s*connect\b/im, /^\s*registered:\s*\S+/im];
 const WHOIS_TAKEN_WEAK = [/^\s*domain name:\s*\S+/im, /^\s*domain:\s*\S+/im];
 
-let bootstrapCache = null;
+// The pending promise is cached so concurrent checks share one IANA request;
+// a failed load is dropped so the next call retries.
+let bootstrapPromise = null;
 
-export async function loadBootstrap(fetchImpl) {
-  if (bootstrapCache) return bootstrapCache;
-  const r = await safeFetch(fetchImpl, IANA_BOOTSTRAP, { headers: { Accept: 'application/json' } });
-  if (r.status !== 200) throw new Error(`IANA RDAP bootstrap unavailable (HTTP ${r.status})`);
-  const data = JSON.parse(r.text);
-  const map = {};
-  for (const [tlds, urls] of data.services) {
-    const base = urls.find((u) => u.startsWith('https://')) || urls[0];
-    for (const tld of tlds) map[tld.toLowerCase()] = base.endsWith('/') ? base : `${base}/`;
-  }
-  bootstrapCache = map;
-  return map;
+export function loadBootstrap(fetchImpl) {
+  if (bootstrapPromise) return bootstrapPromise;
+  bootstrapPromise = (async () => {
+    const r = await safeFetch(fetchImpl, IANA_BOOTSTRAP, { headers: { Accept: 'application/json' } });
+    if (r.status !== 200) throw new Error(`IANA RDAP bootstrap unavailable (HTTP ${r.status})`);
+    const data = JSON.parse(r.text);
+    const map = {};
+    for (const [tlds, urls] of data.services) {
+      const base = urls.find((u) => u.startsWith('https://')) || urls[0];
+      for (const tld of tlds) map[tld.toLowerCase()] = base.endsWith('/') ? base : `${base}/`;
+    }
+    return map;
+  })().catch((err) => {
+    bootstrapPromise = null;
+    throw err;
+  });
+  return bootstrapPromise;
 }
 
 export function resetBootstrapCache() {
-  bootstrapCache = null;
+  bootstrapPromise = null;
 }
 
 export function classifyWhois(text) {

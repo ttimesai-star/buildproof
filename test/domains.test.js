@@ -54,6 +54,26 @@ test('bootstrap failure is reported, not thrown', async () => {
   assert.match(r.detail, /bootstrap/);
 });
 
+test('bootstrap: concurrent callers share one request; a failure is retried next time', async () => {
+  resetBootstrapCache();
+  let n = 0;
+  let fail = true;
+  const fetch = async (url) => {
+    if (url === IANA_BOOTSTRAP) {
+      n++;
+      if (fail) return { status: 503, url, text: async () => '' };
+      return { status: 200, url, text: async () => JSON.stringify(BOOTSTRAP) };
+    }
+    return { status: 404, url, text: async () => '' };
+  };
+  const first = await checkDomain('acme', 'com', { fetch });
+  assert.equal(first.status, STATUS.UNCONFIRMED);
+  fail = false;
+  const all = await Promise.all(['a', 'b', 'c'].map((l) => checkDomain(l, 'com', { fetch })));
+  assert.deepEqual(all.map((r) => r.status), [STATUS.AVAILABLE, STATUS.AVAILABLE, STATUS.AVAILABLE]);
+  assert.equal(n, 2);
+});
+
 test('a registered record that happens to contain "not found" stays taken', () => {
   const rec = ['Domain Name: acme.io', 'Registrar: Example Registrar', 'Registrant Phone: not found'].join('\n');
   assert.equal(classifyWhois(rec), STATUS.TAKEN);

@@ -5,8 +5,9 @@
 import { STATUS, normalize, nowIso, safeFetch } from './util.js';
 
 export function isSameName(title, name) {
-  const t = String(title).trim();
+  const t = String(title ?? '').trim();
   const n = normalize(name);
+  if (!n || !normalize(t)) return false;
   if (normalize(t) === n) return true;
   const head = t.split(/\s*[:\-–—|]\s+|\s*[:|]\s*/)[0];
   return normalize(head) === n;
@@ -62,12 +63,14 @@ export async function checkPlayStore(name, deps = {}) {
   const checkedAt = nowIso(deps.clock);
   const base = { kind: 'app', store: 'Google Play', target: name, source: 'Google Play search page', checkedAt };
   if (r.status !== 200) return { ...base, status: STATUS.UNCONFIRMED, matches: [], detail: `HTTP ${r.status}` };
-  // Play prints "No results for <query>" and may follow it with unrelated suggestions.
-  if (/No results for/.test(r.text)) return { ...base, status: STATUS.AVAILABLE, matches: [], detail: 'Google Play: no results for this name' };
+  // Parse first: an exact match anywhere on the page wins over the
+  // "No results for" banner that Play shows above unrelated suggestions.
   const apps = parsePlaySearch(r.text);
-  if (!apps.length) return { ...base, status: STATUS.UNCONFIRMED, matches: [], detail: 'search page layout not recognised' };
   const matches = apps
     .filter((a) => isSameName(a.title, name))
     .map((a) => ({ ...a, link: `https://play.google.com/store/apps/details?id=${a.id}` }));
-  return { ...base, status: matches.length ? STATUS.TAKEN : STATUS.AVAILABLE, matches, detail: `${apps.length} results scanned` };
+  if (matches.length) return { ...base, status: STATUS.TAKEN, matches, detail: `${apps.length} results scanned` };
+  if (/No results for/.test(r.text)) return { ...base, status: STATUS.AVAILABLE, matches: [], detail: 'Google Play: no results for this name' };
+  if (!apps.length) return { ...base, status: STATUS.UNCONFIRMED, matches: [], detail: 'search page layout not recognised' };
+  return { ...base, status: STATUS.AVAILABLE, matches: [], detail: `${apps.length} results scanned, none with this name` };
 }

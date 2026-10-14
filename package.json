@@ -1,6 +1,6 @@
 {
   "name": "brand-name-checker",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Read-only brand name availability check: domains (RDAP/WHOIS), social handles, app stores and USPTO trademarks, with a timestamp on every result.",
   "type": "module",
   "main": "src/index.js",

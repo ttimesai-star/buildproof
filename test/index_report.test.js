@@ -68,3 +68,18 @@ test('a platform that cannot be confirmed disqualifies every variation', async (
 test('input validation', async () => {
   await assert.rejects(() => checkNames({ names: [] }), /at least one name/);
 });
+
+test('report escapes link, image and HTML syntax from external data', () => {
+  const res = {
+    request: { names: ['x'], tlds: ['com'], platforms: [], trademarkCountries: ['US'] },
+    results: [{
+      name: '[click](https://evil.example)', domains: [], handles: [],
+      apps: [{ store: 'Apple App Store', matches: [{ title: '<script>alert(1)</script>', developer: '![img](x)' }], checkedAt: 't' }],
+      trademarks: [],
+    }],
+  };
+  const md = renderReport(res);
+  assert.ok(!md.includes('[click](https://evil.example)'));
+  assert.ok(!md.includes('<script>'));
+  assert.ok(!md.includes('![img](x)'));
+});
