@@ -101,6 +101,22 @@ export const PLATFORMS = {
   },
 };
 
+function hostPath(u) {
+  try {
+    const x = new URL(u);
+    return `${x.host}${x.pathname}`.toLowerCase().replace(/\/+$/, '');
+  } catch {
+    return String(u);
+  }
+}
+
+// A login wall or cookie-consent interstitial answers 200 on a different
+// host or path; that must never be read as "profile exists".
+export function redirectedAway(requested, final) {
+  if (!final) return false;
+  return hostPath(requested) !== hostPath(final);
+}
+
 export const DEFAULT_PLATFORMS = ['x', 'instagram', 'tiktok', 'youtube', 'github', 'reddit'];
 
 export async function checkHandle(handle, platform, deps = {}) {
@@ -110,7 +126,12 @@ export async function checkHandle(handle, platform, deps = {}) {
     return { kind: 'handle', platform, target: handle, status: STATUS.UNCONFIRMED, detail: 'platform not supported', checkedAt: nowIso(deps.clock) };
   }
   const h = handle.toLowerCase();
-  const r = await safeFetch(fetchImpl, p.url(h), { headers: p.headers || {} });
-  const { status, detail } = r.status === -1 ? ok(STATUS.UNCONFIRMED, `network error: ${r.text}`) : p.classify(r, h);
+  const requested = p.url(h);
+  const r = await safeFetch(fetchImpl, requested, { headers: p.headers || {} });
+  let verdict;
+  if (r.status === -1) verdict = ok(STATUS.UNCONFIRMED, `network error: ${r.text}`);
+  else if (redirectedAway(requested, r.url)) verdict = ok(STATUS.UNCONFIRMED, `redirected to ${hostPath(r.url)} (login or consent page)`);
+  else verdict = p.classify(r, h);
+  const { status, detail } = verdict;
   return { kind: 'handle', platform, label: p.label, target: h, status, detail, link: p.profile(h), checkedAt: nowIso(deps.clock) };
 }

@@ -58,3 +58,12 @@ test('network error and unknown platform are unconfirmed', async () => {
   assert.equal((await checkHandle('acme', 'x', { fetch })).status, STATUS.UNCONFIRMED);
   assert.equal((await checkHandle('acme', 'myspace', { fetch })).status, STATUS.UNCONFIRMED);
 });
+
+test('redirect to a login or consent page is unconfirmed, not taken', async () => {
+  const consent = async () => ({ status: 200, url: 'https://consent.youtube.com/m?continue=x', text: async () => '<html>consent</html>' });
+  const r = await checkHandle('acme', 'youtube', { fetch: consent });
+  assert.equal(r.status, STATUS.UNCONFIRMED);
+  assert.ok(r.detail.includes('consent.youtube.com'));
+  const sameUrlWithQuery = async (url) => ({ status: 200, url: `${url}?cbrd=1`, text: async () => '<html>channel</html>' });
+  assert.equal((await checkHandle('acme', 'youtube', { fetch: sameUrlWithQuery })).status, STATUS.TAKEN);
+});

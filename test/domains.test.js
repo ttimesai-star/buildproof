@@ -53,3 +53,8 @@ test('bootstrap failure is reported, not thrown', async () => {
   assert.equal(r.status, STATUS.UNCONFIRMED);
   assert.match(r.detail, /bootstrap/);
 });
+
+test('a registered record that happens to contain "not found" stays taken', () => {
+  const rec = ['Domain Name: acme.io', 'Registrar: Example Registrar', 'Registrant Phone: not found'].join('\n');
+  assert.equal(classifyWhois(rec), STATUS.TAKEN);
+});

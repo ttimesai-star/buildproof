@@ -33,7 +33,10 @@ const WHOIS_FREE = [
   /\bdomain .* is available\b/i,
   /\bno object found\b/i,
 ];
-const WHOIS_TAKEN = [/^\s*domain name:\s*\S+/im, /^\s*registrar:/im, /^\s*status:\s*connect\b/im, /^\s*domain:\s*\S+/im];
+// Strong evidence of a registration wins over any "not found" phrase that a
+// registered record might contain; weak evidence counts only when no free phrase matched.
+const WHOIS_TAKEN_STRONG = [/^\s*registrar:\s*\S+/im, /^\s*creation date:\s*\S+/im, /^\s*status:\s*connect\b/im, /^\s*registered:\s*\S+/im];
+const WHOIS_TAKEN_WEAK = [/^\s*domain name:\s*\S+/im, /^\s*domain:\s*\S+/im];
 
 let bootstrapCache = null;
 
@@ -56,8 +59,9 @@ export function resetBootstrapCache() {
 }
 
 export function classifyWhois(text) {
+  if (WHOIS_TAKEN_STRONG.some((re) => re.test(text))) return STATUS.TAKEN;
   if (WHOIS_FREE.some((re) => re.test(text))) return STATUS.AVAILABLE;
-  if (WHOIS_TAKEN.some((re) => re.test(text))) return STATUS.TAKEN;
+  if (WHOIS_TAKEN_WEAK.some((re) => re.test(text))) return STATUS.TAKEN;
   return STATUS.UNCONFIRMED;
 }
 
