@@ -136,6 +136,28 @@ $("drop").ondragover = (e) => { e.preventDefault(); $("drop").classList.add("ove
 $("drop").ondragleave = () => $("drop").classList.remove("over");
 $("drop").ondrop = async (e) => { e.preventDefault(); $("drop").classList.remove("over"); if (e.dataTransfer.files[0]) { $("hash").value = await sha256(e.dataTransfer.files[0]); verify(); } };
 $("file").onchange = async () => { if ($("file").files[0]) { $("hash").value = await sha256($("file").files[0]); verify(); } };
+// One-click samples: the demo records registered on Base mainnet (see README, "Live on Base").
+const DEMO_PARTIES = {
+  "act_01.pdf": "0xC628715a1ed46eb555B088e3d43dc61AE0134F33 Client (demo)\n0x7590D6cc6D35B0798916638725CBc0DBA4777e8F Contractor (synthetic)",
+  "act_01_tampered.pdf": "0xC628715a1ed46eb555B088e3d43dc61AE0134F33 Client (demo)\n0x7590D6cc6D35B0798916638725CBc0DBA4777e8F Contractor (synthetic)",
+  "ai_review_manifest.json": "0x7590D6cc6D35B0798916638725CBc0DBA4777e8F AI operator (demo key)\n0xC628715a1ed46eb555B088e3d43dc61AE0134F33 Human reviewer",
+};
+async function trySample(name) {
+  const i = networks.findIndex((n) => n.chainId === 8453);
+  if (i >= 0 && $("net").value !== String(i)) { $("net").value = String(i); $("net").onchange(); }
+  $("result").innerHTML = `<div class="card muted">Downloading ${esc(name)} and hashing it in your browser...</div>`;
+  try {
+    const r = await fetch("samples/" + name, { cache: "no-store" });
+    if (!r.ok) throw new Error(`samples/${name}: HTTP ${r.status}`);
+    $("hash").value = await sha256(await r.blob());
+    $("parties").value = DEMO_PARTIES[name] || "";
+    await verify();
+    $("result").scrollIntoView({ behavior: "smooth", block: "start" });
+  } catch (e) {
+    $("result").innerHTML = `<div class="card"><span class="badge bad">Sample failed</span><p class="mono">${esc(e.message)}</p></div>`;
+  }
+}
+document.querySelectorAll("[data-sample]").forEach((b) => { b.onclick = () => trySample(b.dataset.sample); });
 $("go").onclick = verify;
 $("signbtn").onclick = signAsParty;
 loadNetworks();

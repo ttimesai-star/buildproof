@@ -1,0 +1,128 @@
+%PDF-1.3
+%“Œ‹ž ReportLab Generated PDF document (opensource)
+1 0 obj
+<<
+/F1 2 0 R /F2 3 0 R /F3 4 0 R /F4 5 0 R /F5 6 0 R
+>>
+endobj
+2 0 obj
+<<
+/BaseFont /Helvetica /Encoding /WinAnsiEncoding /Name /F1 /Subtype /Type1 /Type /Font
+>>
+endobj
+3 0 obj
+<<
+/BaseFont /Helvetica-Oblique /Encoding /WinAnsiEncoding /Name /F2 /Subtype /Type1 /Type /Font
+>>
+endobj
+4 0 obj
+<<
+/BaseFont /Helvetica-Bold /Encoding /WinAnsiEncoding /Name /F3 /Subtype /Type1 /Type /Font
+>>
+endobj
+5 0 obj
+<<
+/BaseFont /Courier-Bold /Encoding /WinAnsiEncoding /Name /F4 /Subtype /Type1 /Type /Font
+>>
+endobj
+6 0 obj
+<<
+/BaseFont /Courier /Encoding /WinAnsiEncoding /Name /F5 /Subtype /Type1 /Type /Font
+>>
+endobj
+7 0 obj
+<<
+/Contents 11 0 R /MediaBox [ 0 0 595.2756 841.8898 ] /Parent 10 0 R /Resources <<
+/Font 1 0 R /ProcSet [ /PDF /Text /ImageB /ImageC /ImageI ]
+>> /Rotate 0 /Trans <<
+
+>> 
+  /Type /Page
+>>
+endobj
+8 0 obj
+<<
+/PageMode /UseNone /Pages 10 0 R /Type /Catalog
+>>
+endobj
+9 0 obj
+<<
+/Author (BuildProof synthetic example) /CreationDate (D:20000101000000+00'00') /Creator (anonymous) /Keywords () /ModDate (D:20000101000000+00'00') /Producer (ReportLab PDF Library - \(opensource\)) 
+  /Subject (unspecified) /Title (Acceptance Act No. 1) /Trapped /False
+>>
+endobj
+10 0 obj
+<<
+/Count 1 /Kids [ 7 0 R ] /Type /Pages
+>>
+endobj
+11 0 obj
+<<
+/Length 1875
+>>
+stream
+1 0 0 1 0 0 cm  BT /F1 12 Tf 14.4 TL ET
+BT /F2 8 Tf 9.6 TL ET
+BT 1 0 0 1 50 781.8898 Tm (SYNTHETIC EXAMPLE - fictional parties, not a real document) Tj T* ET
+BT /F3 15 Tf 18 TL ET
+BT 1 0 0 1 50 761.8898 Tm (Acceptance Act No. 1) Tj T* ET
+BT /F1 10 Tf 12 TL ET
+BT 1 0 0 1 50 739.8898 Tm (Document type: Acceptance Act) Tj T* ET
+BT /F1 10 Tf 12 TL ET
+BT 1 0 0 1 50 724.8898 Tm (Document No.: 1) Tj T* ET
+BT /F1 10 Tf 12 TL ET
+BT 1 0 0 1 50 709.8898 Tm (Contract No.: GC-2026/014) Tj T* ET
+BT /F1 10 Tf 12 TL ET
+BT 1 0 0 1 50 694.8898 Tm (Date: 2026-04-30) Tj T* ET
+BT /F1 10 Tf 12 TL ET
+BT 1 0 0 1 50 679.8898 Tm (Period: 2026-03-10 to 2026-04-30) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 50 658.8898 Tm (Client: Alder Street Development Ltd. | Tax ID: 900000001 | IBAN: XX00 TEST 0000 0000 0001) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 50 643.8898 Tm (Contractor: Granite & Beam Construction LLC | Tax ID: 900000002 | IBAN: XX00 TEST 0000 0000 0002) Tj T* ET
+BT /F4 9 Tf 10.8 TL ET
+BT 1 0 0 1 50 618.8898 Tm (No  Work item                      Unit        Qty      Rate        Amount) Tj T* ET
+BT /F5 9 Tf 10.8 TL ET
+BT 1 0 0 1 50 605.8898 Tm (1   Excavation and backfill        m3     1200.000      6.50     7800.00) Tj T* ET
+BT /F5 9 Tf 10.8 TL ET
+BT 1 0 0 1 50 592.8898 Tm (2   Concrete foundation C25/30     m3      200.000    118.00    23600.00) Tj T* ET
+BT /F1 10 Tf 12 TL ET
+BT 1 0 0 1 50 571.8898 Tm (Subtotal: 31400.00) Tj T* ET
+BT /F1 10 Tf 12 TL ET
+BT 1 0 0 1 50 556.8898 Tm (VAT 20%: 6280.00) Tj T* ET
+BT /F1 10 Tf 12 TL ET
+BT 1 0 0 1 50 541.8898 Tm (Total: 37680.00) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 50 496.8898 Tm (For the Client: ____________________        For the Contractor: ____________________) Tj T* ET
+BT /F2 8 Tf 9.6 TL ET
+BT 1 0 0 1 50 481.8898 Tm (Signatures are applied with the parties' wallets in BuildProof \(EIP-712\).) Tj T* ET
+ 
+endstream
+endobj
+xref
+0 12
+0000000000 65535 f 
+0000000061 00000 n 
+0000000132 00000 n 
+0000000239 00000 n 
+0000000354 00000 n 
+0000000466 00000 n 
+0000000576 00000 n 
+0000000681 00000 n 
+0000000886 00000 n 
+0000000955 00000 n 
+0000001247 00000 n 
+0000001307 00000 n 
+trailer
+<<
+/ID 
+[<27d20386d0a4488527a773a96ee76705><27d20386d0a4488527a773a96ee76705>]
+% ReportLab generated PDF document -- digest (opensource)
+
+/Info 9 0 R
+/Root 8 0 R
+/Size 12
+>>
+startxref
+3234
+%%EOF

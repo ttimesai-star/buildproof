@@ -42,6 +42,16 @@ a{color:var(--accent)}
   <h1>BuildProof: verify a document</h1>
   <p class="lead">Drop a contract, supplementary agreement or acceptance act. Your browser computes its SHA-256 locally; only the hash is sent to the blockchain node. The file itself is never uploaded.</p>
 
+  <div class="card" id="samples">
+    <strong>Try it in one click</strong> <span class="muted">(Base mainnet, synthetic demo documents)</span>
+    <div style="margin-top:10px">
+      <button class="secondary" data-sample="act_01.pdf">Signed acceptance act</button>
+      <button class="secondary" data-sample="act_01_tampered.pdf">Same act, one amount changed</button>
+      <button class="secondary" data-sample="ai_review_manifest.json">AI legal review, approved by a human</button>
+    </div>
+    <p class="muted" id="samplenote" style="margin-bottom:0">Each button downloads the sample from this site, hashes it in your browser and looks the hash up on-chain. Files: <a href="samples/act_01.pdf">act_01.pdf</a>, <a href="samples/act_01_tampered.pdf">act_01_tampered.pdf</a> (23,600.00 changed to 28,600.00), <a href="samples/ai_review_manifest.json">ai_review_manifest.json</a>.</p>
+  </div>
+
   <div class="card">
     <div class="row">
       <div>
