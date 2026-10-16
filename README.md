@@ -4,7 +4,34 @@
 
 Built for the [BLI Legal Tech Hackathon 2](https://dorahacks.io/hackathon/legal-hack-2026/detail), tracks *LegalTech & RegTech* and *AI x Blockchain*.
 
-> Status: live on Base mainnet (registry, verify page, paid x402 API), demo records only so far; see [Live on Base](#live-on-base). Every transaction the CLI sends carries BuildProof's Base Builder Code (ERC-8021).
+> Status: **prototype, unaudited.** The registry, the verify page and the paid x402 API run on Base mainnet, but every record there is a demo with synthetic documents and there are no external users yet; see [Live on Base](#live-on-base). Every transaction the CLI sends carries BuildProof's Base Builder Code (ERC-8021).
+
+## Check it in 2 minutes
+
+1. **Open the verify page:** https://ttimesai-star.github.io/buildproof/ and use the three buttons under *Try it in one click*. Each one downloads a sample file, hashes it in your browser and looks the hash up on Base mainnet:
+   - *Signed acceptance act*: `Attested by all 2 signers` and `Signers match your list`, with registration and completion times from the chain;
+   - *Same act, one amount changed* (23,600.00 → 28,600.00, one byte): `Not found`;
+   - *AI legal review, approved by a human*: an AI-output manifest that became `ATTESTED` only after the human reviewer co-signed.
+
+   You can also drop any of your own files there: nothing is uploaded, only the hash is sent to the RPC node.
+2. **Watch the demo video:** [demo.mp4](https://ttimesai-star.github.io/buildproof/demo.mp4).
+3. **Ask the paid API as an agent would** (no wallet needed to see the price):
+   ```bash
+   curl -i https://buildproof-x402.zbignevich.workers.dev/v1/attestation/0x5ce4d8327a23f4fa5c5e0bcc551f22ecc9285b36b5aab25eb4b9093ac92db006
+   # HTTP/1.1 402 Payment Required + PAYMENT-REQUIRED header: 10000 units of USDC (= $0.01) on Base (eip155:8453)
+   ```
+4. **Check the contract:** [Basescan](https://basescan.org/address/0xF818e4A95BBA02c822bCa8A0CFB50a2Ae4B8eE94) and [Sourcify exact match](https://repo.sourcify.dev/8453/0xF818e4A95BBA02c822bCa8A0CFB50a2Ae4B8eE94) of [contracts/BuildProofRegistry.sol](contracts/BuildProofRegistry.sol).
+5. **Run everything locally** (Foundry, Node 18+, Python 3.10+): `bash scripts/demo.sh` for the 10-step story on a local chain, `npm test` for all tests. CI runs both on every push.
+
+## Why it matters legally
+
+Disputes over documents are usually not about what the law says but about *which file* is the one the parties agreed to. US evidence rules already accept a matching hash as the ordinary way to show that a copy is identical to the original, and the main e-signature laws do not deny legal effect to electronic records. BuildProof turns that into a shared, timestamped record that every party can check without trusting the others.
+
+- **US Federal Rules of Evidence, Rule 902(14)** makes data copied from an electronic file self-authenticating when it is "authenticated by a process of digital identification", certified by a qualified person. The Advisory Committee note: "data copied from electronic devices, storage media, and electronic files are ordinarily authenticated by 'hash value'... If the hash values for the original and copy are different, then the copy is not identical to the original." BuildProof records which hash each party approved and when; the certification itself is still done by a person.
+- **US ESIGN Act, 15 U.S.C. § 7001(a)(1):** a signature, contract or other record "may not be denied legal effect, validity, or enforceability solely because it is in electronic form". **Arizona, A.R.S. § 44-7061(A)-(B):** a signature or record "secured through blockchain technology" is an electronic signature or electronic record.
+- **EU eIDAS Regulation (EU) No 910/2014, Article 25:** an electronic signature "shall not be denied legal effect and admissibility as evidence in legal proceedings solely on the grounds that it is in an electronic form or that it does not meet the requirements for qualified electronic signatures"; only a *qualified* electronic signature has the effect of a handwritten one (Art. 25(2)).
+
+What this means for BuildProof, stated plainly: a wallet signature is an ordinary electronic signature, not a qualified one (QES). Use BuildProof as the evidence and audit layer next to whatever signature the contract or local law requires, not instead of it. This is a description of the product, not legal advice for any jurisdiction.
 
 ## Legal use cases
 
@@ -117,11 +144,12 @@ The hosted page (https://ttimesai-star.github.io/buildproof/) can also talk to y
 ## Tests
 
 ```bash
-forge test                                                # 20 tests including fuzzing: signatures, replay, malleability, griefing, amendments
+forge test                                                # 21 tests including fuzzing: signatures, replay, malleability, griefing, amendments
 python checker/tests/test_crosscheck.py                   # the cross-check finds exactly the planted problems and nothing else
 node --test api/test/api.test.mjs                         # x402 API: 402 price list, paid lookups on a live anvil registry, refused bad payments
 node --test api/test/near.test.mjs                        # NEAR AI Agent Market backend: brief parsing, webhook HMAC, submit/decline
-node --test cli/test/attribution.test.mjs cli/test/legal.test.mjs # ERC-8021 suffix and legal use cases (NDA, AI-output manifests)
+node --test api/test/openserv.test.mjs                    # OpenServ x402 marketplace agent endpoint
+node --test cli/test/attribution.test.mjs cli/test/legal.test.mjs cli/test/samples.test.mjs # ERC-8021 suffix, legal use cases (NDA, AI-output manifests), verify-page samples pinned to the mainnet records
 ```
 
 ## CLI reference
@@ -192,7 +220,7 @@ Then add the network to `docs/networks.json` (`name`, `chainId`, `rpc`, `registr
 - **Threat Model & Front-Running:** Anyone may register a hash on-chain with any signer list. Front-running a registration with fake signers produces a distinct attestation ID (`realId != fakeId`) because the ID embeds the registrar address and full signers array. Verifiers filter attestations against their list of expected party addresses.
 - **EIP-712 Replay & Malleability:** EIP-712 domain separators bind signatures to `block.chainid` and the specific registry contract address. Signatures embed attestation IDs and document hashes, preventing signature reuse across documents, contracts, or chains. Signature malleability is prevented by enforcing upper bounds (`s <= HALF_N`) and rejecting `address(0)`.
 - **Privacy & Salt:** Only document SHA-256 hashes go on-chain. Standard hashes of short or low-entropy template documents can potentially be brute-forced. Real construction contracts contain sufficient unique metadata (dates, IBANs, tax IDs, amounts) to prevent dictionary attacks. Salted document hashes are on the roadmap for low-entropy forms.
-- **Legal Weight:** A wallet signature is not a Qualified Electronic Signature (QES) under EU eIDAS or US ESIGN regulations. BuildProof functions as an immutable audit trail and tamper-evident evidence layer alongside legally required signatures.
+- **Legal Weight:** A wallet signature is an ordinary electronic signature: under EU eIDAS it is not a qualified electronic signature (QES), and US ESIGN only guarantees it is not refused *solely* because it is electronic. BuildProof functions as an immutable audit trail and tamper-evident evidence layer alongside legally required signatures; see [Why it matters legally](#why-it-matters-legally).
 - **Cross-Check Scope:** The rule-based extractor in `crosscheck.py` handles the layout of the bundled examples. For arbitrary layouts, `--llm-only` uses an LLM solely for field extraction, while all compliance logic and arithmetic rules remain 100% deterministic Python.
 - **Roadmap:** EAS attestation adapter, salted document hashes, additional legal document templates, subcontractor chain reconciliation.
 
