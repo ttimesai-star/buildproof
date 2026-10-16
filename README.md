@@ -14,7 +14,7 @@ Built for the [BLI Legal Tech Hackathon 2](https://dorahacks.io/hackathon/legal-
    - *AI legal review, approved by a human*: an AI-output manifest that became `ATTESTED` only after the human reviewer co-signed.
 
    You can also drop any of your own files there: nothing is uploaded, only the hash is sent to the RPC node.
-2. **Watch the demo video:** [demo.mp4](https://ttimesai-star.github.io/buildproof/demo.mp4).
+2. **Watch the demo video** (2 min 47 s, narrated): [demo.mp4](https://ttimesai-star.github.io/buildproof/demo.mp4).
 3. **Ask the paid API as an agent would** (no wallet needed to see the price):
    ```bash
    curl -i https://buildproof-x402.zbignevich.workers.dev/v1/attestation/0x5ce4d8327a23f4fa5c5e0bcc551f22ecc9285b36b5aab25eb4b9093ac92db006
@@ -176,7 +176,7 @@ python checker/crosscheck.py scans/*.pdf --llm-only          # rules on LLM-extr
 
 ## Live on Base
 
-Demo video (57 s, silent, captioned): [ttimesai-star.github.io/buildproof/demo.mp4](https://ttimesai-star.github.io/buildproof/demo.mp4). It records the live verify page, the live x402 quote and the Builder Code check on mainnet.
+Demo video (2 min 47 s, synthetic narration, captioned): [ttimesai-star.github.io/buildproof/demo.mp4](https://ttimesai-star.github.io/buildproof/demo.mp4). It records the live verify page against the mainnet registry (signed act, tampered copy, human-approved AI review), the cross-check, the live x402 quote and the legal scope. The voice is text-to-speech (Microsoft Edge neural voice); the script that records it is [scripts/video/make_video.py](scripts/video/make_video.py). The first, silent 57-second version is kept as [demo_v1_silent.mp4](https://ttimesai-star.github.io/buildproof/demo_v1_silent.mp4).
 
 | | |
 |---|---|

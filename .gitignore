@@ -8,3 +8,5 @@ deployments/31337.json
 .env
 *.key
 __pycache__/
+scripts/video/aud/
+scripts/video/raw/
